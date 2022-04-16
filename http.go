@@ -21,16 +21,24 @@ import (
 )
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Host == "freenews.xxx" {
+	if r.Host == "free.news" {
+
+		if r.URL.Path == "/ca.pem" {
+			w.Header().Set("Content-Type", "application/x-pem-file")
+			w.Write([]byte(caString))
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(fmt.Sprintf(
-			"Welcome to freenews.xxx\nPlease make sure to install the following CA:\n\n%s\n\nCurrently unlocking:\n%s",
-			caString, strings.Join(proxyHosts[1:], "\n"))))
+			"<pre>Welcome to free.news (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre>",
+			*publicIP, *dnsPort, caString, strings.Join(proxyHosts[1:], "\n"))))
 		return
 	}
 
 	url, err := url.Parse("https://" + r.Host)
 	if err != nil {
-		log.Fatalf("%s . Terminating.", err)
+		log.Fatalf("[ERR] %s . Terminating.", err)
 	}
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	proxy.Transport = transport
@@ -55,9 +63,9 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return  err
 		}
-		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: #444444; font-family: Arial; width: 100% !important; display: block; color: white;\">Served by Freenews.xxx</span>"), -1) // replace html
+		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\">Content served by <a href=\"https://free.news\" style=\"color: white; text-decoration: none;\">FreeNews 🌍</a></span>"), -1) // replace html
 		compress(res, b)
-		log.Printf("Successfully Injected %s", res.Request.URL)
+		log.Printf("[HTTP] Successfully Injected %s 💉", res.Request.URL.String())
 		return nil
 
 	}
@@ -66,9 +74,9 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 func serveHTTP() {
 	//create custom resolver that does not use our own dns
-	dnsResolverIP := "8.8.8.8:53"
+	dnsResolverIP := "1.1.1.1:53"
 	dnsResolverProto := "udp"
-	dnsResolverTimeoutMs := 5000
+	dnsResolverTimeoutMs := 3000
 	dialer := &net.Dialer{
 		Resolver: &net.Resolver{
 			PreferGo: true,
@@ -83,23 +91,21 @@ func serveHTTP() {
 
 	transport = &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			log.Println("dialing", addr)
 			return dialer.DialContext(ctx, network, addr)
 		},
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	go func() {
-		server := &http.Server{Addr: "0.0.0.0:80", Handler: http.HandlerFunc(mainHandler)}
+		server := &http.Server{Addr: ":80", Handler: http.HandlerFunc(mainHandler)}
 		if err := server.ListenAndServe(); err != nil {
-			log.Fatalf("%s . Terminating.", err)
+			log.Fatalf("[ERR] %s . Terminating.", err)
 		}
 	}()
-
+	log.Println("[HTTP] Listening on 0.0.0.0:80/443(tls)")
 	if err := listenAndServeTLS(); err != nil {
-		log.Fatalf("%s . Terminating.", err)
+		log.Fatalf("[ERR] %s . Terminating.", err)
 	}
-
 }
 
 func listenAndServeTLS() error {
@@ -128,9 +134,6 @@ func decompress(httpResponse *http.Response) (buffer []byte, err error) {
 		fallthrough
 	case "gzip":
 		// A format using the Lempel-Ziv coding (LZ77), with a 32-bit CRC.
-		// This is the original format of the UNIX gzip program.
-		// The HTTP/1.1 standard also recommends that the servers supporting this content-encoding should recognize
-		// x-gzip as an alias, for compatibility purposes.
 
 		reader, err = gzip.NewReader(body)
 		if err != io.EOF {
@@ -159,10 +162,6 @@ func decompress(httpResponse *http.Response) (buffer []byte, err error) {
 	case "compress":
 		// Unhandled: Fallback to default
 
-		// A format using the Lempel-Ziv-Welch (LZW) algorithm.
-		// The value name was taken from the UNIX compress program, which implemented this algorithm.
-		// Like the compress program, which has disappeared from most UNIX distributions,
-		// this content-encoding is not used by many browsers today, partly because of a patent issue (it expired in 2003).
 		fallthrough
 
 	default:

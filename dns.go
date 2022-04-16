@@ -13,10 +13,9 @@ func parseQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		switch q.Qtype {
 		case dns.TypeA:
-			log.Printf("Query for %s\n", q.Name)
 			var proxy bool
 			for _, proxyHost := range proxyHosts {
-				if strings.HasSuffix(q.Name, fmt.Sprintf("%s.", proxyHost)) {
+				if strings.Contains(q.Name, proxyHost) {
 					proxy = true
 					break
 				}
@@ -24,34 +23,40 @@ func parseQuery(m *dns.Msg) {
 			if !proxy {
 				continue
 			}
-			//TODO use public interface ip
-			ip := "127.0.0.1"
-			rr, err := dns.NewRR(fmt.Sprintf("%s A %s", q.Name, ip))
-			if err == nil {
-				m.Answer = append(m.Answer, rr)
+			record := fmt.Sprintf("%s A %s", q.Name, *publicIP)
+			rr, err := dns.NewRR(record)
+			if err != nil {
+				log.Println(err)
+				continue
 			}
+			m.Answer = append(m.Answer, rr)
 		}
 	}
 }
 
-func handleDnsRequest(w dns.ResponseWriter, r *dns.Msg) {
+func handleDnsRequest(w dns.ResponseWriter, req *dns.Msg) {
 	m := new(dns.Msg)
-	m.SetReply(r)
+	m.SetReply(req)
 	m.Compress = false
 
-	switch r.Opcode {
+	switch req.Opcode {
 	case dns.OpcodeQuery:
 		parseQuery(m)
 	}
 
-	//fail all domains we dont know
-	//todo forward to 1.1.1.1
 	if len(m.Answer) == 0 {
-		dns.HandleFailed(w, r)
-	} else {
-		log.Println(m.Answer)
+		c := &dns.Client{Net: "udp"}
+		res, _, err := c.Exchange(req, "1.1.1.1:53")
+		if err != nil {
+			dns.HandleFailed(w, req)
+			log.Println("[ERR] ", err)
+			return
+		}
+		w.WriteMsg(res)
+		return
 	}
 
+	log.Printf("[DNS] Response: %s", m.Answer)
 	w.WriteMsg(m)
 }
 
@@ -60,12 +65,11 @@ func serveDNS() {
 	dns.HandleFunc(".", handleDnsRequest)
 
 	// start server
-	port := 5300
-	server := &dns.Server{Addr: ":" + strconv.Itoa(port), Net: "udp"}
-	log.Printf("Starting at %d\n", port)
+	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsPort), Net: "udp"}
+	log.Printf("[DNS] Listening on 0.0.0.0:%d (udp only)", *dnsPort)
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {
-		log.Fatalf("Failed to start server: %s\n ", err.Error())
+		log.Fatalf("[ERR] Failed to start server: %s\n ", err.Error())
 	}
 }

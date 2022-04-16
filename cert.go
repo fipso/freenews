@@ -19,7 +19,6 @@ import (
 func setupCerts() {
 
 	var err error
-	var ca *x509.Certificate
 	var caPrivKey *rsa.PrivateKey
 	var caPEMBuffer *bytes.Buffer
 

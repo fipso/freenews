@@ -23,7 +23,7 @@ The nameserver just mirrors 1.1.1.1 (cloudflare dns server), but overrides all r
 4. sudo go run .
 5. open udp 53, tcp 80 and 443
 6. on you phone set your dns server to your server ip
-7. go to freenews.xxx
+7. go to free.news
 8. download and install ca file (apps not wifi)
 
 everything should be working, make sure to share your dns server and ca file with your friends so they can profit aswell.

@@ -14,6 +14,7 @@ var tlsServerConfig *tls.Config
 var caString string
 var publicIP *string
 var dnsPort *int
+var dnsTlsPort *int
 
 var proxyHosts = []string{
 	//our own fake domain
@@ -28,13 +29,14 @@ var proxyHosts = []string{
 }
 
 func main() {
-	publicIP = flag.String("publicIP", getPublicIP(), "public interface ip address") 
+	publicIP = flag.String("publicIP", getPublicIP(), "public interface ip address")
 	dnsPort = flag.Int("dnsPort", 53, "port")
+	dnsTlsPort = flag.Int("dnsTlsPort", 853, "port")
 	flag.Parse()
 
 	log.Printf("[*] Welcome. Public DNS Sever IP: %s", *publicIP)
 	setupCerts()
-	log.Printf("[*] CA Signature: %x...", ca.Signature[:16]) 
+	log.Printf("[*] CA Signature: %x...", ca.Signature[:16])
 	go serveHTTP()
 	serveDNS()
 }

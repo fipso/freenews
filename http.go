@@ -43,7 +43,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	proxy.Transport = transport
 	director := proxy.Director
-	proxy.Director = func(req *http.Request){
+	proxy.Director = func(req *http.Request) {
 		//spoof twitter referer
 		req.Header.Set("Referer", "https://t.co/")
 		//spoof google bot ua and ip
@@ -61,11 +61,11 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := decompress(res)
 		if err != nil {
-			return  err
+			return err
 		}
 		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\">Content served by <a href=\"https://free.news\" style=\"color: white; text-decoration: none;\">FreeNews 🌍</a></span>"), -1) // replace html
 		compress(res, b)
-		log.Printf("[HTTP] Successfully Injected %s 💉", res.Request.URL.String())
+		//log.Printf("[HTTP] Successfully Injected %s 💉", res.Request.URL.String())
 		return nil
 
 	}

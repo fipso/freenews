@@ -26,7 +26,7 @@ func parseQuery(m *dns.Msg) {
 			record := fmt.Sprintf("%s A %s", q.Name, *publicIP)
 			rr, err := dns.NewRR(record)
 			if err != nil {
-				log.Println(err)
+				log.Println("[ERR]", err)
 				continue
 			}
 			m.Answer = append(m.Answer, rr)
@@ -49,7 +49,7 @@ func handleDnsRequest(w dns.ResponseWriter, req *dns.Msg) {
 		res, _, err := c.Exchange(req, "1.1.1.1:53")
 		if err != nil {
 			dns.HandleFailed(w, req)
-			log.Println("[ERR] ", err)
+			log.Println("[ERR]", err)
 			return
 		}
 		w.WriteMsg(res)
@@ -65,11 +65,34 @@ func serveDNS() {
 	dns.HandleFunc(".", handleDnsRequest)
 
 	// start server
-	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsPort), Net: "udp"}
-	log.Printf("[DNS] Listening on 0.0.0.0:%d (udp only)", *dnsPort)
+	go func() {
+		log.Printf("[DNS] Listening on 0.0.0.0:%d(udp only)/%d(tcp tls) ", *dnsPort, *dnsTlsPort)
+		server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsPort), Net: "udp"}
+		err := server.ListenAndServe()
+		defer server.Shutdown()
+		if err != nil {
+			log.Fatalf("[ERR] Failed to start DNS server: %s\n ", err.Error())
+		}
+	}()
+
+	if err := listenAndServeDoT(); err != nil {
+		log.Fatalf("[ERR] %s . Terminating.", err)
+	}
+
+}
+
+func listenAndServeDoT() error {
+	/*
+		conn, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *dnsTlsPort))
+		if err != nil {
+			return err
+		}
+		tlsListener := tls.NewListener(conn, tlsServerConfig)*/
+	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsServerConfig}
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {
-		log.Fatalf("[ERR] Failed to start server: %s\n ", err.Error())
+		return err
 	}
+	return nil
 }

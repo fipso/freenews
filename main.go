@@ -44,7 +44,6 @@ func main() {
 	go serveDNS()
 	if(*dotDomain != ""){
 		setupDoTCerts()
-		log.Printf("[*] DNS over TLS (DoT) Domain: %s", *dotDomain)
 		go serveDNSoverTLS()
 	}
 

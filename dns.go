@@ -66,7 +66,7 @@ func serveDNS() {
 
 	// start server
 	go func() {
-		log.Printf("[DNS] Listening on 0.0.0.0:%d(udp only)/%d(tcp tls) ", *dnsPort, *dnsTlsPort)
+		log.Printf("[DNS] Listening on 0.0.0.0:%d(udp only)", *dnsPort)
 		server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsPort), Net: "udp"}
 		err := server.ListenAndServe()
 		defer server.Shutdown()
@@ -83,6 +83,7 @@ func serveDNSoverTLS() error {
 			return err
 		}
 		tlsListener := tls.NewListener(conn, tlsServerConfig)*/
+	log.Printf("[DNS-TLS] Listening on %s:%d(tcp/tls)", *dotDomain, *dnsTlsPort)
 	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsDoTServerConfig}
 	err := server.ListenAndServe()
 	defer server.Shutdown()

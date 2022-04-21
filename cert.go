@@ -148,7 +148,7 @@ func setupCerts() {
 		log.Fatal(err)
 	}
 
-	tlsServerConfig = &tls.Config{
+	tlsHttpServerConfig = &tls.Config{
 		MinVersion:               tls.VersionTLS10,
 		NextProtos:               []string{"http/1.1"},
 		Certificates:             []tls.Certificate{serverCert},
@@ -157,4 +157,34 @@ func setupCerts() {
 
 	certpool := x509.NewCertPool()
 	certpool.AppendCertsFromPEM(caPEMBuffer.Bytes())
+}
+
+func setupDoTCerts(){
+	if _, err := os.Stat("cert/dot_cert.pem"); err == nil {
+		log.Fatal(err)
+	}
+	if _, err := os.Stat("cert/dot_key.pem"); err == nil {
+		log.Fatal(err)
+	}
+
+	// pem decode
+	certPEMBytes, err := os.ReadFile("cert/dot_cert.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	certPrivKeyPEMBytes, err := os.ReadFile("cert/dot_key.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	serverCert, err := tls.X509KeyPair(certPEMBytes, certPrivKeyPEMBytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tlsDoTServerConfig = &tls.Config{
+		Certificates:             []tls.Certificate{serverCert},
+		PreferServerCipherSuites: true,
+	}
+	
 }

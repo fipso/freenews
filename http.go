@@ -114,7 +114,7 @@ func listenAndServeTLS() error {
 		return err
 	}
 
-	tlsListener := tls.NewListener(conn, tlsServerConfig)
+	tlsListener := tls.NewListener(conn, tlsHttpServerConfig)
 	server := &http.Server{Handler: http.HandlerFunc(mainHandler)}
 
 	return server.Serve(tlsListener)

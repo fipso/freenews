@@ -74,21 +74,16 @@ func serveDNS() {
 			log.Fatalf("[ERR] Failed to start DNS server: %s\n ", err.Error())
 		}
 	}()
-
-	if err := listenAndServeDoT(); err != nil {
-		log.Fatalf("[ERR] %s . Terminating.", err)
-	}
-
 }
 
-func listenAndServeDoT() error {
+func serveDNSoverTLS() error {
 	/*
 		conn, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *dnsTlsPort))
 		if err != nil {
 			return err
 		}
 		tlsListener := tls.NewListener(conn, tlsServerConfig)*/
-	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsServerConfig}
+	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsDoTServerConfig}
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {

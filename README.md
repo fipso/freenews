@@ -2,6 +2,8 @@
 
 A paywall bypassing reverse proxy and DNS server written in go.
 
+**This project is still hard work in progress. Expect stuff to just not work. Setup requires some linux and network knowledge.**
+
 ### Why ?
 
 The goal of this project is to provide a unpaywalling solution that works on platforms where modifying your browsers content is not possible.
@@ -25,7 +27,7 @@ The nameserver just mirrors 1.1.1.1 (cloudflare dns server), but overrides all r
 2. install go
 3. clone repo
 4. go build . && chmod +x freenews
-5. ./freenews
+5. sudo ./freenews
 6. open udp 53, tcp 80 and 443
 7. on you phone set your dns server to your server ip
 8. go to free.news

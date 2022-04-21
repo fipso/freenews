@@ -30,8 +30,8 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hosts := ""
-		for host := range config.Hosts {
-			hosts += fmt.Sprintf("%s\n", host)
+		for _, host := range config.Hosts {
+			hosts += fmt.Sprintf("%s\n", host.Name)
 		}
 
 		w.Header().Set("Content-Type", "text/html")
@@ -49,33 +49,33 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.Transport = transport
 	director := proxy.Director
 	proxy.Director = func(req *http.Request) {
-		options, ok := config.Hosts[req.Host]
-		if !ok {
+		options := getHostOptions(req.Host)
+		if options == nil {
 			director(req)
 			return
 		}
 		//spoof twitter referer
-		if options.SocialReferer {
+		if options.SocialReferer == nil || *options.SocialReferer {
 			req.Header.Set("Referer", "https://t.co/")
 		}
 		//spoof google bot ua
-		if options.GooglebotUA {
+		if options.SocialReferer == nil || *options.GooglebotUA {
 			req.Header.Set("User-Agent", "AdsBot-Google (+http://www.google.com/adsbot.html)")
 		}
 		//spoof google bot datacenter ip
-		if options.GooglebotIP {
+		if options.SocialReferer == nil || *options.GooglebotIP {
 			req.Header.Set("X-Forwarded-For", "66.102.0.0")
 		}
 		//disable cookies
-		if options.DisableCookies {
+		if options.SocialReferer == nil || *options.DisableCookies {
 			req.Header.Set("Cookie", "")
 			req.Header.Set("Set-Cookie", "")
 		}
 		director(req)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
-		options, ok := config.Hosts[res.Request.Host]
-		if !ok {
+		options := getHostOptions(res.Request.Host)
+		if options == nil {
 			return nil
 		}
 
@@ -87,9 +87,16 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return err
 		}
-		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>" + options.InjectHTML), -1) // replace html
+
+		//Inject custom html
+		if options.InjectHTML != nil {
+			b = bytes.Replace(b, []byte("<body>"), []byte(*options.InjectHTML), -1)
+		}
+
+		//Add mitm warning banner
+		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>"), -1)
+
 		compress(res, b)
-		//log.Printf("[HTTP] Successfully Injected %s 💉", res.Request.URL.String())
 		return nil
 
 	}

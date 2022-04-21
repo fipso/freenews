@@ -96,9 +96,9 @@ func setupCerts() {
 	}
 
 	var dnsNames []string
-	for host := range config.Hosts {
-		dnsNames = append(dnsNames, fmt.Sprintf("*.%s", host))
-		dnsNames = append(dnsNames, host)
+	for _, host := range config.Hosts {
+		dnsNames = append(dnsNames, fmt.Sprintf("*.%s", host.Name))
+		dnsNames = append(dnsNames, host.Name)
 	}
 
 	// set up our server certificate

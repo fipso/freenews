@@ -56,7 +56,7 @@ This is a pitty, because its the only way to use a custom dns outside your wifi 
 
 ### How to add hosts to the unpaywall list ?
 
-You can add new hosts to the list by appending `[host.com]` like blocks to the `config.toml` file.
+You can add new hosts to the list by appending a `[[host]]` block to the `config.toml` file.
 
 ### TODO
 

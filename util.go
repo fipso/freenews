@@ -28,3 +28,12 @@ func getPublicIP() string {
 
 	return ip.Query
 }
+
+func getHostOptions(host string) *HostOptions {
+	for _, entry := range config.Hosts {
+		if entry.Name == host {
+			return &entry
+		}
+	}
+	return nil
+}

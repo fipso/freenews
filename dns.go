@@ -14,8 +14,8 @@ func parseQuery(m *dns.Msg) {
 		switch q.Qtype {
 		case dns.TypeA:
 			var proxy bool
-			for proxyHost := range config.Hosts {
-				if strings.Contains(q.Name, proxyHost) {
+			for _, proxyHost := range config.Hosts {
+				if strings.Contains(q.Name, proxyHost.Name) {
 					proxy = true
 					break
 				}

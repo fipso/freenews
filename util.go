@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 )
 
 //https://stackoverflow.com/questions/41670155/get-public-ip-in-golang
@@ -31,7 +32,7 @@ func getPublicIP() string {
 
 func getHostOptions(host string) *HostOptions {
 	for _, entry := range config.Hosts {
-		if entry.Name == host {
+		if strings.Contains(host, entry.Name) {
 			return &entry
 		}
 	}

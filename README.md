@@ -1,4 +1,4 @@
-# FreeNews
+# FreeNews 🔨💵🧱
 
 A paywall bypassing reverse proxy and DNS server written in go.
 

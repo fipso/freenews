@@ -29,10 +29,15 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		hosts := ""
+		for host := range config.Hosts {
+			hosts += fmt.Sprintf("%s\n", host)
+		}
+
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(fmt.Sprintf(
-			"<pre>Welcome to free.news (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre>",
-			*publicIP, *dnsPort, caString, strings.Join(proxyHosts[1:], "\n"))))
+			"<pre>Welcome to %s (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre>",
+			config.InfoHost, *publicIP, *dnsPort, caString, hosts)))
 		return
 	}
 
@@ -44,17 +49,36 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.Transport = transport
 	director := proxy.Director
 	proxy.Director = func(req *http.Request) {
+		options, ok := config.Hosts[req.Host]
+		if !ok {
+			director(req)
+			return
+		}
 		//spoof twitter referer
-		req.Header.Set("Referer", "https://t.co/")
-		//spoof google bot ua and ip
-		req.Header.Set("User-Agent", "AdsBot-Google (+http://www.google.com/adsbot.html)")
-		req.Header.Set("X-Forwarded-For", "66.102.0.0")
+		if options.SocialReferer {
+			req.Header.Set("Referer", "https://t.co/")
+		}
+		//spoof google bot ua
+		if options.GooglebotUA {
+			req.Header.Set("User-Agent", "AdsBot-Google (+http://www.google.com/adsbot.html)")
+		}
+		//spoof google bot datacenter ip
+		if options.GooglebotIP {
+			req.Header.Set("X-Forwarded-For", "66.102.0.0")
+		}
 		//disable cookies
-		req.Header.Set("Cookie", "")
-		req.Header.Set("Set-Cookie", "")
+		if options.DisableCookies {
+			req.Header.Set("Cookie", "")
+			req.Header.Set("Set-Cookie", "")
+		}
 		director(req)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
+		options, ok := config.Hosts[res.Request.Host]
+		if !ok {
+			return nil
+		}
+
 		contentType := res.Header.Get("Content-Type")
 		if !strings.HasPrefix(contentType, "text/html") {
 			return nil
@@ -63,7 +87,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return err
 		}
-		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\">Content served by <a href=\"https://free.news\" style=\"color: white; text-decoration: none;\">FreeNews 🌍</a></span>"), -1) // replace html
+		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>" + options.InjectHTML), -1) // replace html
 		compress(res, b)
 		//log.Printf("[HTTP] Successfully Injected %s 💉", res.Request.URL.String())
 		return nil

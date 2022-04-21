@@ -96,7 +96,7 @@ func setupCerts() {
 	}
 
 	var dnsNames []string
-	for _, host := range proxyHosts {
+	for host := range config.Hosts {
 		dnsNames = append(dnsNames, fmt.Sprintf("*.%s", host))
 		dnsNames = append(dnsNames, host)
 	}
@@ -112,7 +112,6 @@ func setupCerts() {
 			StreetAddress: []string{"Golden Gate Bridge"},
 			PostalCode:    []string{"94016"},
 		},
-		//IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
 		DNSNames:     dnsNames,
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().AddDate(10, 0, 0),
@@ -159,7 +158,7 @@ func setupCerts() {
 	certpool.AppendCertsFromPEM(caPEMBuffer.Bytes())
 }
 
-func setupDoTCerts(){
+func setupDoTCerts() {
 	if _, err := os.Stat("cert/dot_cert.pem"); err != nil {
 		log.Fatal(err)
 	}
@@ -186,5 +185,5 @@ func setupDoTCerts(){
 		Certificates:             []tls.Certificate{serverCert},
 		PreferServerCipherSuites: true,
 	}
-	
+
 }

@@ -14,7 +14,7 @@ func parseQuery(m *dns.Msg) {
 		switch q.Qtype {
 		case dns.TypeA:
 			var proxy bool
-			for _, proxyHost := range proxyHosts {
+			for proxyHost := range config.Hosts {
 				if strings.Contains(q.Name, proxyHost) {
 					proxy = true
 					break
@@ -44,6 +44,7 @@ func handleDnsRequest(w dns.ResponseWriter, req *dns.Msg) {
 		parseQuery(m)
 	}
 
+	//Forward request to upstream dns
 	if len(m.Answer) == 0 {
 		c := &dns.Client{Net: "udp"}
 		res, _, err := c.Exchange(req, "1.1.1.1:53")
@@ -77,12 +78,6 @@ func serveDNS() {
 }
 
 func serveDNSoverTLS() error {
-	/*
-		conn, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *dnsTlsPort))
-		if err != nil {
-			return err
-		}
-		tlsListener := tls.NewListener(conn, tlsServerConfig)*/
 	log.Printf("[DNS-TLS] Listening on %s:%d(tcp/tls)", *dotDomain, *dnsTlsPort)
 	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsDoTServerConfig}
 	err := server.ListenAndServe()

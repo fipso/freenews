@@ -1,0 +1,17 @@
+# The landing/info page where u can download the MITM CA to your device
+info_host = "free.news"
+
+[ft.com]
+# Defaults: 
+# social_referer = true
+# googlebot_ua = true
+# googlebot_ip = true
+# disble_cookies = true
+# inject_html = ""
+
+[theguardian.com]
+[faz.net]
+[wsj.com]
+[nytimes.com]
+[telegraph.co.uk]
+[bloomberg.com]

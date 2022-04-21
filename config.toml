@@ -2,7 +2,7 @@
 info_host = "free.news"
 
 [[host]]
-name = "ft.com"
+name = "example.com"
 # Defaults: 
 # social_referer = true
 # googlebot_ua = true
@@ -10,17 +10,3 @@ name = "ft.com"
 # disble_cookies = true
 # inject_html = ""
 
-[[host]]
-name = "theguardian.com"
-
-[[host]]
-name = "wsj.com"
-
-[[host]]
-name = "nytimes.com"
-
-[[host]]
-name = "telegraph.co.uk"
-
-[[host]]
-name = "bloomberg.com"

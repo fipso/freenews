@@ -5,7 +5,7 @@ A paywall bypassing reverse proxy and DNS server written in go.
 ### Why ?
 
 The goal of this project is to provide a unpaywalling solution that works on platforms where modifying your browsers content is not possible.
-Basilcy this is something like [Hover](https://github.com/nathan-149/hover-paywalls-browser-extension), but as a reverse proxy (+DNS for better usability). This makes usage on mobile devices realy enjoyable.
+Basilcy this is something like [Hover](https://github.com/nathan-149/hover-paywalls-browser-extension), but as a reverse proxy (+DNS for better usability). This makes usage on mobile devices really enjoyable.
 It can be used on all devices where the user is able to change the DNS and install a self signed CA.
 
 ### How does it work ?
@@ -49,7 +49,7 @@ Should be simillar to android.
 DNS over TLS (DoT) is a new privacy focused way to use normal dns using a tls socket.
 To make this work with this project, you have to get yourself a domain and tls cert.
 Place the cert file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
-Start freenews with the `-dotDomain <your domain>` flag to enable DoT.
+Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/tcp.
 
 For some reason this does currently not work with the private dns option on android.
 This is a pitty, because its the only way to use a custom dns outside your wifi without installing third party apps.

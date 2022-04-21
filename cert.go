@@ -160,10 +160,10 @@ func setupCerts() {
 }
 
 func setupDoTCerts(){
-	if _, err := os.Stat("cert/dot_cert.pem"); err == nil {
+	if _, err := os.Stat("cert/dot_cert.pem"); err != nil {
 		log.Fatal(err)
 	}
-	if _, err := os.Stat("cert/dot_key.pem"); err == nil {
+	if _, err := os.Stat("cert/dot_key.pem"); err != nil {
 		log.Fatal(err)
 	}
 

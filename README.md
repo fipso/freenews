@@ -23,25 +23,29 @@ The nameserver just mirrors 1.1.1.1 (cloudflare dns server), but overrides all r
 
 ### How to install ?
 
-1. buy a vps server
-2. install go
-3. clone repo
-4. go build . && chmod +x freenews
-5. sudo ./freenews
-6. open udp 53, tcp 80 and 443
-7. on you phone set your dns server to your server ip
-8. go to free.news
-9. download and install ca file (apps not wifi)
-10. done. everything should be working, make sure to share your dns server and ca file with your friends so they can profit aswell.
+Requirements:
+
+- Go 1.18+
+- Currently on Linux is tested (Windows, MacOS, etc... should work)
+- Host should have port 53/udp, 80,443,853/tcp open (dns ports can be changed)
+- If port 53 is blocked try to disable your local dns server ex: `systemctl stop systemd-resolved`
+
+1. `git clone https://github.com/fipso/freenews.git`
+2. `cd freenews`
+3. `go build . && chmod +x freenews`
+4. `sudo ./freenews`
+5. on you phone set your dns server to your public host ip
+6. go to free.news
+7. download and install ca file (apps not wifi)
 
 ### How do i change the DNS on mobile ?
 
 Android:
 Use **one** of the follwing:
 
-1. Wifi Settigns > Use static IP > DNS 1
-2. Use a 3rd party app to use DNS or DoT
-3. ~~Use private dns option (requires DoT)~~
+- Wifi Settigns > Use static IP > DNS 1
+- Use a 3rd party app to use DNS or DoT
+- ~~Use private dns option (requires DoT)~~
 
 IOS:
 Should be simillar to android.

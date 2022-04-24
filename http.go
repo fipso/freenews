@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -90,17 +91,28 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 		//Inject custom html
 		if options.InjectHTML != nil {
-			b = bytes.Replace(b, []byte("<body>"), []byte(*options.InjectHTML), -1)
+			b = injectHtml(b, *options.InjectHTML)
 		}
 
 		//Add mitm warning banner
-		b = bytes.Replace(b, []byte("<body>"), []byte("<body><span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>"), -1)
+		b = injectHtml(b, "<span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>")
 
 		compress(res, b)
 		return nil
 
 	}
 	proxy.ServeHTTP(w, r)
+}
+
+func injectHtml(b []byte, inject string) []byte{
+	re := regexp.MustCompile(`<body>|<body[^>]+>`)
+	locs := re.FindAllIndex(b, -1)
+	for _, loc := range locs {
+		log.Println(loc)
+		b = append(b[:loc[1]], append([]byte(inject), b[loc[1]:]...)...)
+	}
+	//log.Println(string(b[loc[0]:loc[1]+100]))
+	return b
 }
 
 func serveHTTP() {

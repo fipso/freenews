@@ -43,9 +43,9 @@ Requirements:
 Android:
 Use **one** of the follwing:
 
+- Recommended: Use private dns option (requires DoT)
 - Wifi Settigns > Use static IP > DNS 1
 - Use a 3rd party app to use DNS or DoT
-- ~~Use private dns option (requires DoT)~~
 
 IOS:
 Should be simillar to android.
@@ -54,11 +54,8 @@ Should be simillar to android.
 
 DNS over TLS (DoT) is a new privacy focused way to use normal dns using a tls socket.
 To make this work with this project, you have to get yourself a domain and tls cert.
-Place the cert file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
+Place the cert (**Copy fullchain.pem instead of cert.pem to `dot_cert.pem` if you are using Let's Encrypt**) file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
 Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/tcp.
-
-For some reason this does currently not work with the private dns option on android.
-This is a pitty, because its the only way to use a custom dns outside your wifi without installing third party apps.
 
 ### How to add hosts to the unpaywall list ?
 
@@ -66,7 +63,7 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 
 ### TODO
 
-- [ ] Fix DNS over TLS on android
+- [x] Fix DNS over TLS
 - [ ] Allow tcp connections
 - [ ] Improve code quality and comments
 - [ ] Provide better usage instructions

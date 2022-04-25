@@ -13,11 +13,15 @@ func parseQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		switch q.Qtype {
 		case dns.TypeA:
-			var proxy bool
-			for _, proxyHost := range config.Hosts {
-				if strings.Contains(q.Name, proxyHost.Name) {
-					proxy = true
-					break
+			//check if is info host
+			proxy := strings.Contains(q.Name, config.InfoHost)
+			//check if its on unpaywall list if not
+			if !proxy {
+				for _, proxyHost := range config.Hosts {
+					if strings.Contains(q.Name, proxyHost.Name) {
+						proxy = true
+						break
+					}
 				}
 			}
 			if !proxy {

@@ -26,7 +26,7 @@ The nameserver just mirrors 1.1.1.1 (cloudflare dns server), but overrides all r
 Requirements:
 
 - Go 1.18+
-- Currently on Linux is tested (Windows, MacOS, etc... should work)
+- Currently only Linux is tested (Windows, MacOS, etc... should work)
 - Host should have port 53/udp, 80,443,853/tcp open (dns ports can be changed)
 - If port 53 is blocked try to disable your local dns server ex: `systemctl stop systemd-resolved`
 

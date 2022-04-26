@@ -42,6 +42,12 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	options := getHostOptions(r.Host)
+	if options == nil {
+		w.Write([]byte("You shall not pass!"))
+		return
+	}
+
 	url, err := url.Parse("https://" + r.Host)
 	if err != nil {
 		log.Fatalf("[ERR] %s . Terminating.", err)
@@ -50,11 +56,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.Transport = transport
 	director := proxy.Director
 	proxy.Director = func(req *http.Request) {
-		options := getHostOptions(req.Host)
-		if options == nil {
-			director(req)
-			return
-		}
 		//spoof twitter referer
 		if options.SocialReferer == nil || *options.SocialReferer {
 			req.Header.Set("Referer", "https://t.co/")
@@ -75,11 +76,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		director(req)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
-		options := getHostOptions(res.Request.Host)
-		if options == nil {
-			return nil
-		}
-
 		contentType := res.Header.Get("Content-Type")
 		if !strings.HasPrefix(contentType, "text/html") {
 			return nil

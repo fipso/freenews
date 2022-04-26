@@ -33,7 +33,11 @@ func main() {
 
 	log.Printf("[*] Welcome. Public DNS Sever IP: %s", *publicIP)
 	setupCerts()
-	log.Printf("[*] CA Signature: %x...", ca.Signature[:16])
+	if len(ca.Signature) != 0 {
+		log.Printf("[*] CA Signature: %x...", ca.Signature[:16])
+	}else{
+		log.Printf("[*] Generated New CA:\n%s ", caString)
+	}
 
 	go serveDNS()
 	if *dotDomain != "" {

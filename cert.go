@@ -22,7 +22,7 @@ func setupCerts() {
 	var caPrivKey *rsa.PrivateKey
 	var caPEMBuffer *bytes.Buffer
 
-	if _, err := os.Stat("cert/ca.pem"); err == nil {
+	if _, err := os.Stat("./cert"); err == nil {
 
 		// pem decode
 		caPEMBytes, err := os.ReadFile("cert/ca.pem")
@@ -42,6 +42,10 @@ func setupCerts() {
 		caPrivKey, err = x509.ParsePKCS1PrivateKey(caPrivKeyPEM.Bytes)
 
 	} else if errors.Is(err, os.ErrNotExist) {
+
+		if err = os.Mkdir("./cert", os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
 
 		ca = &x509.Certificate{
 			SerialNumber: big.NewInt(2019),

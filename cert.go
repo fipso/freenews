@@ -50,12 +50,9 @@ func setupCerts() {
 		ca = &x509.Certificate{
 			SerialNumber: big.NewInt(2019),
 			Subject: pkix.Name{
-				Organization:  []string{"Freenews Org"},
+				Organization:  []string{"FreeNews MITM CA"},
 				Country:       []string{"US"},
-				Province:      []string{""},
-				Locality:      []string{"San Francisco"},
-				StreetAddress: []string{"Golden Gate Bridge"},
-				PostalCode:    []string{"94016"},
+				Locality:      []string{"Somewhere"},
 			},
 			NotBefore:             time.Now(),
 			NotAfter:              time.Now().AddDate(10, 0, 0),
@@ -109,12 +106,9 @@ func setupCerts() {
 	cert := &x509.Certificate{
 		SerialNumber: big.NewInt(2020),
 		Subject: pkix.Name{
-			Organization:  []string{"Freenews"},
+			Organization:  []string{"FreeNews MITM CA"},
 			Country:       []string{"US"},
-			Province:      []string{""},
-			Locality:      []string{"San Francisco"},
-			StreetAddress: []string{"Golden Gate Bridge"},
-			PostalCode:    []string{"94016"},
+			Locality:      []string{"Somewhere"},
 		},
 		DNSNames:     dnsNames,
 		NotBefore:    time.Now(),

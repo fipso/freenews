@@ -100,7 +100,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-func injectHtml(b []byte, inject string) []byte{
+func injectHtml(b []byte, inject string) []byte {
 	re := regexp.MustCompile(`<body>|<body[^>]+>`)
 	locs := re.FindAllIndex(b, -1)
 	for _, loc := range locs {

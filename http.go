@@ -76,6 +76,10 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		director(req)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
+
+		//remove HTST
+		res.Header.Set("Strict-Transport-Security", "")
+
 		contentType := res.Header.Get("Content-Type")
 		if !strings.HasPrefix(contentType, "text/html") {
 			return nil

@@ -35,7 +35,7 @@ func main() {
 	setupCerts()
 	if len(ca.Signature) != 0 {
 		log.Printf("[*] CA Signature: %x...", ca.Signature[:16])
-	}else{
+	} else {
 		log.Printf("[*] Generated New CA:\n%s ", caString)
 	}
 

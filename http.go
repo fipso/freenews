@@ -76,6 +76,10 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		director(req)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
+
+		//remove HTST
+		res.Header.Set("Strict-Transport-Security", "")
+
 		contentType := res.Header.Get("Content-Type")
 		if !strings.HasPrefix(contentType, "text/html") {
 			return nil
@@ -100,11 +104,10 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-func injectHtml(b []byte, inject string) []byte{
+func injectHtml(b []byte, inject string) []byte {
 	re := regexp.MustCompile(`<body>|<body[^>]+>`)
 	locs := re.FindAllIndex(b, -1)
 	for _, loc := range locs {
-		log.Println(loc)
 		b = append(b[:loc[1]], append([]byte(inject), b[loc[1]:]...)...)
 	}
 	//log.Println(string(b[loc[0]:loc[1]+100]))

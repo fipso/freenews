@@ -50,15 +50,11 @@ func setupCerts() {
 		ca = &x509.Certificate{
 			SerialNumber: big.NewInt(2019),
 			Subject: pkix.Name{
-				Organization:  []string{"Freenews Org"},
-				Country:       []string{"US"},
-				Province:      []string{""},
-				Locality:      []string{"San Francisco"},
-				StreetAddress: []string{"Golden Gate Bridge"},
-				PostalCode:    []string{"94016"},
+				Organization: []string{"FreeNews MITM CA"},
+				CommonName:   "FreeNews MITM CA",
 			},
 			NotBefore:             time.Now(),
-			NotAfter:              time.Now().AddDate(10, 0, 0),
+			NotAfter:              time.Now().AddDate(2, 0, 0),
 			IsCA:                  true,
 			ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 			KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -109,7 +105,7 @@ func setupCerts() {
 	cert := &x509.Certificate{
 		SerialNumber: big.NewInt(2020),
 		Subject: pkix.Name{
-			Organization:  []string{"Freenews"},
+			Organization:  []string{"FreeNews MITM"},
 			Country:       []string{"US"},
 			Province:      []string{""},
 			Locality:      []string{"San Francisco"},
@@ -118,8 +114,8 @@ func setupCerts() {
 		},
 		DNSNames:     dnsNames,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(10, 0, 0),
-		SubjectKeyId: []byte{1, 2, 3, 4, 6},
+		NotAfter:     time.Now().AddDate(2, 0, 0),
+		//SubjectKeyId: []byte{1, 2, 3, 4, 6},
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 	}

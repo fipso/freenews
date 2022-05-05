@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/miekg/dns"
 )
@@ -14,14 +13,13 @@ func parseQuery(m *dns.Msg) {
 		switch q.Qtype {
 		case dns.TypeA:
 			//check if is info host
-			proxy := strings.Contains(q.Name, config.InfoHost)
+			host := q.Name[:len(q.Name)-1]
+			proxy := compareBase(host, config.InfoHost)
 			//check if its on unpaywall list if not
 			if !proxy {
-				for _, proxyHost := range config.Hosts {
-					if strings.Contains(q.Name, proxyHost.Name) {
-						proxy = true
-						break
-					}
+				host := getHostOptions(host)
+				if host != nil {
+					proxy = true
 				}
 			}
 			if !proxy {

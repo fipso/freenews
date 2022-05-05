@@ -30,13 +30,16 @@ func getPublicIP() string {
 	return ip.Query
 }
 
+func compareBase(name1, name2 string) bool {
+	n1Parts := strings.Split(name1, ".")
+	n2Parts := strings.Split(name2, ".")
+	return *(*[2]string)(n1Parts[len(n1Parts)-2:]) == *(*[2]string)(n2Parts[len(n2Parts)-2:])
+}
+
 func getHostOptions(host string) *HostOptions {
 	for _, entry := range config.Hosts {
-		nameParts := strings.Split(entry.Name, ".")
-		hostParts := strings.Split(host, ".")
-		//log.Println(nameParts, hostParts)
 		//Only compare domain + tld. Ignore subdomains
-		if *(*[2]string)(nameParts[len(nameParts)-2:]) == *(*[2]string)(hostParts[len(hostParts)-2:]) {
+		if compareBase(entry.Name, host) {
 			//log.Println("match", entry)
 			return &entry
 		}

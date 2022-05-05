@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -32,7 +33,12 @@ func getPublicIP() string {
 
 func getHostOptions(host string) *HostOptions {
 	for _, entry := range config.Hosts {
-		if strings.Contains(host, entry.Name) {
+		nameParts := strings.Split(entry.Name, ".")
+		hostParts := strings.Split(host, ".")
+		//log.Println(nameParts, hostParts)
+		//Only compare domain + tld. Ignore subdomains
+		if *(*[2]string)(nameParts[len(nameParts)-2:]) == *(*[2]string)(hostParts[len(hostParts)-2:]) {
+			log.Println("match", entry)
 			return &entry
 		}
 	}

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
+
+	"github.com/bobesa/go-domain-util/domainutil"
 )
 
 //https://stackoverflow.com/questions/41670155/get-public-ip-in-golang
@@ -31,9 +32,7 @@ func getPublicIP() string {
 }
 
 func compareBase(name1, name2 string) bool {
-	n1Parts := strings.Split(name1, ".")
-	n2Parts := strings.Split(name2, ".")
-	return *(*[2]string)(n1Parts[len(n1Parts)-2:]) == *(*[2]string)(n2Parts[len(n2Parts)-2:])
+	return domainutil.Domain(name1) == domainutil.Domain(name2)
 }
 
 func getHostOptions(host string) *HostOptions {

@@ -38,7 +38,7 @@ func getHostOptions(host string) *HostOptions {
 		//log.Println(nameParts, hostParts)
 		//Only compare domain + tld. Ignore subdomains
 		if *(*[2]string)(nameParts[len(nameParts)-2:]) == *(*[2]string)(hostParts[len(hostParts)-2:]) {
-			log.Println("match", entry)
+			//log.Println("match", entry)
 			return &entry
 		}
 	}

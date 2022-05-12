@@ -48,7 +48,8 @@ Use **one** of the follwing:
 - Use a 3rd party app to use DNS or DoT
 
 IOS:
-Should be simillar to android.
+
+- Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DoT)
 
 ### How to use DNS over TLS ?
 

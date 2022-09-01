@@ -1,5 +1,7 @@
 # FreeNews 🔨💵🧱
 
+![build status](https://github.com/fipso/freenews/actions/workflows/release.yml/badge.svg?branch=main)
+
 A paywall bypassing reverse proxy and DNS server written in go.
 
 Status: Beta Software ~ Should work, may break

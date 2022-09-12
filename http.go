@@ -116,7 +116,7 @@ func injectHtml(b []byte, inject string) []byte {
 
 func serveHTTP() {
 	//create custom resolver that does not use our own dns
-	dnsResolverIP := "1.1.1.1:53"
+	dnsResolverIP := config.UpstreamDNS
 	dnsResolverProto := "udp"
 	dnsResolverTimeoutMs := 3000
 	dialer := &net.Dialer{

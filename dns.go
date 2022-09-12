@@ -49,7 +49,7 @@ func handleDnsRequest(w dns.ResponseWriter, req *dns.Msg) {
 	//Forward request to upstream dns
 	if len(m.Answer) == 0 {
 		c := &dns.Client{Net: "udp"}
-		res, _, err := c.Exchange(req, "1.1.1.1:53")
+		res, _, err := c.Exchange(req, config.UpstreamDNS)
 		if err != nil {
 			dns.HandleFailed(w, req)
 			log.Println("[ERR]", err)

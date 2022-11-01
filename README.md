@@ -46,20 +46,20 @@ Requirements:
 Android:
 Use **one** of the following:
 
-- Recommended: Use private DNS option (requires DNS)
+- Recommended: Use private DNS option (requires DoT)
 - Wi-Fi Settings > Use static IP > DNS 1
-- Use a 3rd party app to use DNS or DNS
+- Use a 3rd party app to use DNS or DoT
 
 IOS:
 
-- Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DNS)
+- Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DoT)
 
 ### How to use DNS over TLS ?
 
-DNS over TLS (DNS) is a new privacy focused way to use normal DNS using a DNS socket.
-To make this work with this project, you have to get yourself a domain and DNS cert.
+DNS over TLS (DoT) is a new privacy focused way to use normal DNS using a TLS socket.
+To make this work with this project, you have to get yourself a domain and SSL cert.
 Place the cert (**Copy `fullchain.pem` instead of `cert.pem` to `dot_cert.pem` if you are using Let's Encrypt**) file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
-Start freenews with the `-dotDomain <your domain>` flag to enable DNS. Make sure to open port 853/UDP.
+Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/UDP.
 
 ### How to add hosts to the unpaywall list ?
 

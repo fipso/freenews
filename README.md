@@ -30,7 +30,7 @@ Requirements:
 
 - Go 1.18+
 - Currently only Linux is tested (Windows, macOS, etc... should work)
-- Host should have port 53/UDP, 80,443,853/UDP open (DNS ports can be changed)
+- Host should have port 53/UDP, 80,443,853/TCP open (DNS ports can be changed)
 - If port 53 is blocked try to disable your local DNS server ex: `systemctl stop systemd-resolved`
 
 1. `git clone https://github.com/fipso/freenews.git`

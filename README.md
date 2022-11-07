@@ -15,6 +15,9 @@ It can be used on all devices where the user is able to change the DNS and insta
 
 ### How does it work ?
 
+![image](https://user-images.githubusercontent.com/8930842/200426509-df51e0b0-fcf1-4777-a06c-f109ee71decf.png)
+
+
 The approach this application follows can be split into two different parts:
 
 Reverse Proxy:

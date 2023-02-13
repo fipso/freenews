@@ -76,3 +76,6 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 - [ ] Provide better usage instructions
 - [ ] More config options
 - [ ] Make flags overridable by TOML config
+
+### Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=fipso/freenews&type=Date)](https://star-history.com/#fipso/freenews&Date)

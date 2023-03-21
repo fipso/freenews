@@ -38,17 +38,15 @@ Requirements:
 - Docker & docker-compose
 
 1. `mkdir freenews && cd freenews`
-2. Get our docker-compose `curl -O https://raw.githubusercontent.com/fipso/freenews/main/docker-compose.yml`
+2. Get our docker-compose  
+   `curl -O https://raw.githubusercontent.com/fipso/freenews/main/docker-compose.yml`
 3. Run it `sudo docker-compose up -d`
-
+  
 -  Check logs `sudo docker-compose logs --follow`
 -  Update `sudo docker-compose pull && sudo docker-compose up -d`
+-  Add hosts: edit config.toml and `sudo docker-compose restart`
 
-Using DNS over TLS (highly recommended):
-
-TODO
-
-### Build & Run
+### Build it yourself
 
 Requirements:
 
@@ -59,12 +57,22 @@ Requirements:
 2. `cd freenews`
 3. `go build . && chmod +x freenews`
 4. `sudo ./freenews`
-5. on you phone set your DNS server to your public host IP
-6. go to `free.news`
-7. download and install ca file (apps not Wi-Fi)
 
 The freenews binary needs root rights to bind low port numbers.
 This will be addressed very soon.
+
+### Usage
+
+1. On you phone set your DNS server to your public host IP / domain
+2. Go to `free.news`
+3. Download and install ca file (apps not Wi-Fi)
+
+### How to use DNS over TLS ?
+
+DNS over TLS (DoT) is a new privacy focused way to use normal DNS using a TLS socket.
+To make this work with this project, you have to get yourself a domain and SSL cert.
+Place the cert (**Copy `fullchain.pem` instead of `cert.pem` to `dot_cert.pem` if you are using Let's Encrypt**) file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
+Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/UDP.
 
 ### How do I change the DNS on mobile ?
 
@@ -79,13 +87,6 @@ IOS:
 
 - Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DoT)
 
-### How to use DNS over TLS ?
-
-DNS over TLS (DoT) is a new privacy focused way to use normal DNS using a TLS socket.
-To make this work with this project, you have to get yourself a domain and SSL cert.
-Place the cert (**Copy `fullchain.pem` instead of `cert.pem` to `dot_cert.pem` if you are using Let's Encrypt**) file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
-Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/UDP.
-
 ### How to add hosts to the unpaywall list ?
 
 You can add new hosts to the list by appending a `[[host]]` block to the `config.toml` file.
@@ -93,6 +94,7 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 ### TODO
 
 - [x] Fix DNS over TLS
+- [x] Add docker image & instructions
 - [ ] Add non root running instructions
 - [ ] Allow UDP connections
 - [ ] Improve code quality and comments

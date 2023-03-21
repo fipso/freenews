@@ -10,4 +10,4 @@ EXPOSE 80
 EXPOSE 443
 EXPOSE 853
 
-CMD ["./freenews"]
+CMD ["/app/freenews"]

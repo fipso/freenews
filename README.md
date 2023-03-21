@@ -17,7 +17,6 @@ It can be used on all devices where the user is able to change the DNS and insta
 
 ![image](https://user-images.githubusercontent.com/8930842/200426509-df51e0b0-fcf1-4777-a06c-f109ee71decf.png)
 
-
 The approach this application follows can be split into two different parts:
 
 Reverse Proxy:
@@ -55,11 +54,6 @@ Requirements:
 
 - Go 1.18+
 - Currently only Linux is tested (Windows, macOS, etc... should work)
-<<<<<<< HEAD
-=======
-- Host should have port 53/UDP, 80,443,853/TCP open (DNS ports can be changed)
-- If port 53 is blocked try to disable your local DNS server ex: `systemctl stop systemd-resolved`
->>>>>>> main
 
 1. `git clone https://github.com/fipso/freenews.git`
 2. `cd freenews`
@@ -106,11 +100,9 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 - [ ] More config options
 - [ ] Make flags overridable by TOML config
 
-<<<<<<< HEAD
 ### Credits
 
 - https://github.com/drk1wi/Modlishka Request body compression
-=======
+
 ### Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=fipso/freenews&type=Date)](https://star-history.com/#fipso/freenews&Date)
->>>>>>> main

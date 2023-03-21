@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   server:
-    image: "ghcr.io/fipso/freenews:dev"
+    image: "ghcr.io/fipso/freenews:main"
     ports:
       - "53:53"
       - "80:80"
@@ -10,7 +10,7 @@ services:
       - "853:853"
     volumes:
       - ./config.toml:/app/config.toml
-      - ./certs/:/app/certs/
+      - ./cert/:/app/cert/
     # Uncomment if you want to use DNS over TLS
     # this is highly recommended, but requires owning a domain
     # and getting a SSL certificate from for ex: lets encrypt

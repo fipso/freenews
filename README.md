@@ -26,12 +26,32 @@ The nameserver just mirrors 1.1.1.1 (Cloudflare DNS server), but overrides all r
 
 ### How to install ?
 
+- Host should have port 53/UDP, 80,443,853/UDP open (DNS ports can be changed)
+- If port 53 is blocked try to disable your local DNS server ex: `systemctl stop systemd-resolved`
+
+### Docker
+
+Requirements:
+
+- Docker & docker-compose
+
+1. `mkdir freenews && cd freenews`
+2. Get our docker-compose `curl -O https://raw.githubusercontent.com/fipso/freenews/main/docker-compose.yml`
+3. Run it `sudo docker-compose up -d`
+
+-  Check logs `sudo docker-compose logs --follow`
+-  Update `sudo docker-compose pull && sudo docker-compose up -d`
+
+Using DNS over TLS (highly recommended):
+
+TODO
+
+### Build & Run
+
 Requirements:
 
 - Go 1.18+
 - Currently only Linux is tested (Windows, macOS, etc... should work)
-- Host should have port 53/UDP, 80,443,853/UDP open (DNS ports can be changed)
-- If port 53 is blocked try to disable your local DNS server ex: `systemctl stop systemd-resolved`
 
 1. `git clone https://github.com/fipso/freenews.git`
 2. `cd freenews`
@@ -40,6 +60,9 @@ Requirements:
 5. on you phone set your DNS server to your public host IP
 6. go to `free.news`
 7. download and install ca file (apps not Wi-Fi)
+
+The freenews binary needs root rights to bind low port numbers.
+This will be addressed very soon.
 
 ### How do I change the DNS on mobile ?
 
@@ -68,8 +91,13 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 ### TODO
 
 - [x] Fix DNS over TLS
+- [ ] Add non root running instructions
 - [ ] Allow UDP connections
 - [ ] Improve code quality and comments
 - [ ] Provide better usage instructions
 - [ ] More config options
 - [ ] Make flags overridable by TOML config
+
+### Credits
+
+- https://github.com/drk1wi/Modlishka Request body compression

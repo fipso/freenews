@@ -15,6 +15,9 @@ It can be used on all devices where the user is able to change the DNS and insta
 
 ### How does it work ?
 
+![image](https://user-images.githubusercontent.com/8930842/200426509-df51e0b0-fcf1-4777-a06c-f109ee71decf.png)
+
+
 The approach this application follows can be split into two different parts:
 
 Reverse Proxy:
@@ -52,6 +55,11 @@ Requirements:
 
 - Go 1.18+
 - Currently only Linux is tested (Windows, macOS, etc... should work)
+<<<<<<< HEAD
+=======
+- Host should have port 53/UDP, 80,443,853/TCP open (DNS ports can be changed)
+- If port 53 is blocked try to disable your local DNS server ex: `systemctl stop systemd-resolved`
+>>>>>>> main
 
 1. `git clone https://github.com/fipso/freenews.git`
 2. `cd freenews`
@@ -69,20 +77,20 @@ This will be addressed very soon.
 Android:
 Use **one** of the following:
 
-- Recommended: Use private DNS option (requires DNS)
+- Recommended: Use private DNS option (requires DoT)
 - Wi-Fi Settings > Use static IP > DNS 1
-- Use a 3rd party app to use DNS or DNS
+- Use a 3rd party app to use DNS or DoT
 
 IOS:
 
-- Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DNS)
+- Recommended: Generate a DNS [profile](https://dns.notjakob.com/index.html) (requires DoT)
 
 ### How to use DNS over TLS ?
 
-DNS over TLS (DNS) is a new privacy focused way to use normal DNS using a DNS socket.
-To make this work with this project, you have to get yourself a domain and DNS cert.
+DNS over TLS (DoT) is a new privacy focused way to use normal DNS using a TLS socket.
+To make this work with this project, you have to get yourself a domain and SSL cert.
 Place the cert (**Copy `fullchain.pem` instead of `cert.pem` to `dot_cert.pem` if you are using Let's Encrypt**) file and its private key at `cert/dot_cert.pem` and `cert/dot_key.pem`.
-Start freenews with the `-dotDomain <your domain>` flag to enable DNS. Make sure to open port 853/UDP.
+Start freenews with the `-dotDomain <your domain>` flag to enable DoT. Make sure to open port 853/UDP.
 
 ### How to add hosts to the unpaywall list ?
 
@@ -98,6 +106,11 @@ You can add new hosts to the list by appending a `[[host]]` block to the `config
 - [ ] More config options
 - [ ] Make flags overridable by TOML config
 
+<<<<<<< HEAD
 ### Credits
 
 - https://github.com/drk1wi/Modlishka Request body compression
+=======
+### Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=fipso/freenews&type=Date)](https://star-history.com/#fipso/freenews&Date)
+>>>>>>> main

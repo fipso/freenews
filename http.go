@@ -61,15 +61,15 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			req.Header.Set("Referer", "https://t.co/")
 		}
 		//spoof google bot ua
-		if options.SocialReferer == nil || *options.GooglebotUA {
+		if options.GooglebotUA == nil || *options.GooglebotUA {
 			req.Header.Set("User-Agent", "AdsBot-Google (+http://www.google.com/adsbot.html)")
 		}
 		//spoof google bot datacenter ip
-		if options.SocialReferer == nil || *options.GooglebotIP {
+		if options.GooglebotIP == nil || *options.GooglebotIP {
 			req.Header.Set("X-Forwarded-For", "66.102.0.0")
 		}
 		//disable cookies
-		if options.SocialReferer == nil || *options.DisableCookies {
+		if options.DisableCookies == nil || *options.DisableCookies {
 			req.Header.Set("Cookie", "")
 			req.Header.Set("Set-Cookie", "")
 		}

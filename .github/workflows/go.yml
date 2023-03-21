@@ -9,6 +9,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Build staticly
+  CGO_ENABLED: 0
 
 jobs:
   build:
@@ -22,7 +24,7 @@ jobs:
         go-version: 1.18
 
     - name: Build
-      run: CGO_ENABLED=0 go build -v ./...
+      run: go build -v ./...
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.0

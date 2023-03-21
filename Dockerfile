@@ -15,4 +15,6 @@ EXPOSE 853/udp
 EXPOSE 80/tcp
 EXPOSE 443/tcp
 
-ENTRYPOINT ["./freenews"]
+RUN chmod +x /app/freenews
+
+ENTRYPOINT ["/app/freenews"]

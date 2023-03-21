@@ -6,8 +6,6 @@ A paywall bypassing reverse proxy and DNS server written in go.
 
 Status: Beta Software ~ Should work, may break
 
-[Download Latest Build](https://nightly.link/fipso/freenews/workflows/go/main/artifact.zip)
-
 ### Why ?
 
 The goal of this project is to provide an unpaywalling solution that works on platforms where modifying your browsers content is not possible. Basically this is something like [Hover](https://github.com/nathan-149/hover-paywalls-browser-extension), but as a reverse proxy (+DNS for better usability). This makes usage on mobile devices really enjoyable.

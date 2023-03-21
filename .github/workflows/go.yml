@@ -38,12 +38,12 @@ jobs:
       packages: write
 
     steps:
+      - uses: actions/checkout@v3
+        name: Build the Docker image
+
       - uses: actions/download-artifact@v2
         with:
           name: freenews
-
-      - uses: actions/checkout@v3
-        name: Build the Docker image
 
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9

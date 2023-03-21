@@ -2,12 +2,17 @@ FROM alpine
 
 WORKDIR /app
 
-COPY ./freenews .
-COPY ./config.toml .
+ADD ./freenews .
+ADD ./config.toml .
 
-EXPOSE 53
-EXPOSE 80
-EXPOSE 443
-EXPOSE 853
+# DNS Ports
+EXPOSE 53/tcp
+EXPOSE 53/udp
+EXPOSE 853/tcp
+EXPOSE 853/udp
 
-CMD ["/app/freenews"]
+# HTTP Ports
+EXPOSE 80/tcp
+EXPOSE 443/tcp
+
+ENTRYPOINT ["./freenews"]

@@ -2,7 +2,8 @@ version: '2.1'
 
 services:
   server:
-    image: "ghcr.io/fipso/freenews:main"
+    #image: "ghcr.io/fipso/freenews:dev"
+    image: freenews:latest 
     ports:
       - "53:53"
       - "80:80"

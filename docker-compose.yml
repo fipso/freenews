@@ -14,4 +14,4 @@ services:
     # Uncomment if you want to use DNS over TLS
     # this is highly recommended, but requires owning a domain
     # and getting a SSL certificate from for ex: lets encrypt
-    #command "/app/freenews -dotDomain YOUR_DOMAIN.com"
+    #command: "-dotDomain YOUR_DOMAIN.com"

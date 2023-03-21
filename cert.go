@@ -180,7 +180,7 @@ func setupDoTCerts() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("[*] DoT Cert %x... Expiry: %s", serverCert.Leaf.Signature[:16], serverCert.Leaf.NotAfter)
+	//log.Printf("[*] DoT Cert %x... Expiry: %s", serverCert.Leaf.Signature[:16], serverCert.Leaf.NotAfter)
 
 	tlsDoTServerConfig = &tls.Config{
 		Certificates:             []tls.Certificate{serverCert},

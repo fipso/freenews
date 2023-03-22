@@ -17,6 +17,7 @@ var publicIP *string
 var dnsPort *int
 var dnsTlsPort *int
 var dotDomain *string
+var blockListPath *string
 var config Config
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 	dnsPort = flag.Int("dnsPort", 53, "port")
 	dnsTlsPort = flag.Int("dnsTlsPort", 853, "port")
 	dotDomain = flag.String("dotDomain", "", "domain for DNS over TLS")
+	blockListPath = flag.String("blockList", "", "path to a DNS block list")
 	flag.Parse()
 
 	//Parse config file
@@ -37,6 +39,11 @@ func main() {
 		log.Printf("[*] CA Signature: %x...", ca.Signature[:16])
 	} else {
 		log.Printf("[*] Generated New CA:\n%s ", caString)
+	}
+
+	if blockListPath != nil {
+		log.Printf("[*] Using block list: %s", *blockListPath)
+		loadBlockList()
 	}
 
 	go serveDNS()

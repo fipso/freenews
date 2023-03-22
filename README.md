@@ -91,10 +91,20 @@ IOS:
 
 You can add new hosts to the list by appending a `[[host]]` block to the `config.toml` file.
 
+### How do I enable AdBlock ?
+
+1. Download a DNS blocklist  
+   ex: `curl -O https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/light.txt`
+2. Start with `-blockList` param  
+   ex: `./freenews -blockList light.txt`
+
+We currently redirect all blocked domains to 127.0.0.1
+
 ### TODO
 
 - [x] Fix DNS over TLS
 - [x] Add docker image & instructions
+- [x] Add DNS based AdBlock
 - [ ] Add non root running instructions
 - [ ] Allow UDP connections
 - [ ] Improve code quality and comments

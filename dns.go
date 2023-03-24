@@ -8,30 +8,39 @@ import (
 	"github.com/miekg/dns"
 )
 
-func parseQuery(m *dns.Msg) {
+func answerQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		switch q.Qtype {
 		case dns.TypeA:
-			//check if is info host
 			host := q.Name[:len(q.Name)-1]
-			proxy := compareBase(host, config.InfoHost)
-			//check if its on unpaywall list if not
-			if !proxy {
-				host := getHostOptions(host)
-				if host != nil {
-					proxy = true
+
+			// Check if question is for the info host or on unpaywall list
+			options := getHostOptions(host)
+			if compareBase(host, config.InfoHost) || options != nil {
+				record := fmt.Sprintf("%s A %s", q.Name, *publicIP)
+				rr, err := dns.NewRR(record)
+				if err != nil {
+					log.Println("[ERR]", err)
+					continue
+				}
+				m.Answer = append(m.Answer, rr)
+				continue
+			}
+
+			// Check if host is on blocklist
+			for _, blocked := range blockList {
+				if host == blocked {
+					record := fmt.Sprintf("%s A 127.0.0.1", q.Name)
+					rr, err := dns.NewRR(record)
+					if err != nil {
+						log.Println("[ERR]", err)
+						continue
+					}
+					m.Answer = append(m.Answer, rr)
+					break
 				}
 			}
-			if !proxy {
-				continue
-			}
-			record := fmt.Sprintf("%s A %s", q.Name, *publicIP)
-			rr, err := dns.NewRR(record)
-			if err != nil {
-				log.Println("[ERR]", err)
-				continue
-			}
-			m.Answer = append(m.Answer, rr)
+
 		}
 	}
 }
@@ -43,10 +52,10 @@ func handleDnsRequest(w dns.ResponseWriter, req *dns.Msg) {
 
 	switch req.Opcode {
 	case dns.OpcodeQuery:
-		parseQuery(m)
+		answerQuery(m)
 	}
 
-	//Forward request to upstream dns
+	// If we dont know what to do forward request to upstream dns
 	if len(m.Answer) == 0 {
 		c := &dns.Client{Net: "udp"}
 		res, _, err := c.Exchange(req, config.UpstreamDNS)
@@ -81,7 +90,11 @@ func serveDNS() {
 
 func serveDNSoverTLS() error {
 	log.Printf("[DNS-TLS] Listening on %s:%d(tcp/tls)", *dotDomain, *dnsTlsPort)
-	server := &dns.Server{Addr: ":" + strconv.Itoa(*dnsTlsPort), Net: "tcp-tls", TLSConfig: tlsDoTServerConfig}
+	server := &dns.Server{
+		Addr:      ":" + strconv.Itoa(*dnsTlsPort),
+		Net:       "tcp-tls",
+		TLSConfig: tlsDoTServerConfig,
+	}
 	err := server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {

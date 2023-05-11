@@ -54,10 +54,28 @@ Requirements:
 1. `git clone https://github.com/fipso/freenews.git`
 2. `cd freenews`
 3. `go build . && chmod +x freenews`
-4. `sudo ./freenews`
+4. `sudo setcap CAP_NET_BIND_SERVICE=+eip freenews` (Optional. Allows binding low ports as normal user.)
+5. `./freenews`
 
-The freenews binary needs root rights to bind low port numbers.
-This will be addressed very soon.
+**Auto Start (systemd)**:  
+If you choose docker you obviously dont need this.  
+Create `freenews.service` at `/lib/systemd/system/`.  
+Example Service:  
+```systemd
+[Unit]
+Description=FreeNews DNS & Reverse Proxy
+
+[Service]
+User=<some non root user>
+WorkingDirectory=/home/<user>/...
+ExecStart=/home/<user>/.../freenews
+# DoT & AdBlock example:
+#ExecStart=/home/<user>/.../freenews -dotDomain <your domain> -blockList <blocklist file>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ### Usage
 
@@ -103,7 +121,7 @@ We currently redirect all blocked domains to 127.0.0.1
 - [x] Fix DNS over TLS
 - [x] Add docker image & instructions
 - [x] Add DNS based AdBlock
-- [ ] Add non root running instructions
+- [x] Add non root running instructions
 - [ ] Allow UDP connections
 - [ ] Improve code quality and comments
 - [ ] Provide better usage instructions

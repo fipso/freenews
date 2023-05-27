@@ -41,7 +41,7 @@ func main() {
 		log.Printf("[*] Generated New CA:\n%s ", caString)
 	}
 
-	if blockListPath != nil {
+        if *blockListPath != "" {
 		log.Printf("[*] Using block list: %s", *blockListPath)
 		loadBlockList()
 	}

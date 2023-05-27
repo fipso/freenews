@@ -21,8 +21,19 @@ function loadDeps(cb){
 
 function share(){
   if(!loaded) return;
-  const article = new Readability(document).parse();
-  navigator.share(article.textContent);
+  try{
+    const documentClone = document.cloneNode(true);
+    const article = new Readability(documentClone).parse();
+    navigator.share({
+      title: article.title,
+      text: article.textContent,
+      url: window.location.href,
+    }).catch((err) => {
+      alert(err);
+    });
+  }catch(err){
+    alert(err);
+  }
 }
 
 

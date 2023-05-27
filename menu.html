@@ -19,9 +19,12 @@ function loadDeps(cb){
   }
 }
 
-loadDeps();
 function share(){
+  if(!loaded) return;
   const article = new Readability(document).parse();
-  alert(JSON.stringify(article));
+  navigator.share(article.textContent);
 }
+
+
+loadDeps();
 </script>

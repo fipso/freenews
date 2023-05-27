@@ -1,0 +1,27 @@
+<span style="background: black; font-family: Arial; font-weight: 400; width: 100% !important; display: block; text-align: center; color: white;"> ⚠️  Served by FreeNews R.Proxy | <span style="cursor: pointer; font-weight: bold" onclick="share()">Share 🌍</span></span>
+
+<script>
+let loaded = false;
+
+function loadDeps(cb){
+  if (loaded){
+    cb();
+  }else {
+    // Load moz-readability
+    var script = document.createElement('script');
+    script.onload = () => {
+      loaded = true;
+      cb();
+    };
+    script.src = "https://cdn.jsdelivr.net/npm/moz-readability@0.2.1/Readability.min.js";
+
+    document.head.appendChild(script);
+  }
+}
+
+loadDeps();
+function share(){
+  const article = new Readability(document).parse();
+  alert(JSON.stringify(article));
+}
+</script>

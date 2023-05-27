@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -38,7 +39,12 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(fmt.Sprintf(
 			"<pre>Welcome to %s (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre>",
-			config.InfoHost, *publicIP, *dnsPort, caString, hosts)))
+			config.InfoHost,
+			*publicIP,
+			*dnsPort,
+			caString,
+			hosts,
+		)))
 		return
 	}
 
@@ -94,8 +100,13 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			b = injectHtml(b, *options.InjectHTML)
 		}
 
-		//Add mitm warning banner
-		b = injectHtml(b, "<span style=\"background: black; font-family: Arial; font-weight: bold; width: 100% !important; display: block; text-align: center; color: white;\"> ⚠️ Content unpaywalled and relayed 🌍</span>")
+		//Add mitm warning banner & menu
+		menu, err := os.ReadFile("./menu.html")
+		if err != nil {
+			return err
+		}
+
+		b = injectHtml(b, string(menu))
 
 		compress(res, b)
 		return nil
@@ -218,7 +229,7 @@ func decompress(httpResponse *http.Response) (buffer []byte, err error) {
 	return
 }
 
-//GZIP content
+// GZIP content
 func gzipBuffer(input []byte) []byte {
 
 	var b bytes.Buffer
@@ -235,7 +246,7 @@ func gzipBuffer(input []byte) []byte {
 	return b.Bytes()
 }
 
-//Deflate content
+// Deflate content
 func deflateBuffer(input []byte) []byte {
 
 	var b bytes.Buffer

@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	InfoHost string        `toml:"info_host"`
-	UpstreamDNS string     `toml:"upstream_dns"`
-	Hosts    []HostOptions `toml:"host"`
+	InfoHost    string        `toml:"info_host"`
+	UpstreamDNS string        `toml:"upstream_dns"`
+	Hosts       []HostOptions `toml:"host"`
 }
 
 type HostOptions struct {

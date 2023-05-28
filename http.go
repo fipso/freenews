@@ -31,6 +31,29 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if r.URL.Path == "/addhost" && r.Method == "POST" {
+			r.ParseForm()
+			name := r.Form.Get("name")
+			config.Hosts = append(config.Hosts, HostOptions{
+				Name: name,
+			})
+
+			f, err := os.OpenFile("config.toml", os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Println(err)
+				w.Write([]byte("Error"))
+				return
+			}
+
+			// TODO: Allowing user input may be insecure
+			_, err = f.WriteString(fmt.Sprintf("\n[[host]]\nname = \"%s\"\n", name))
+			if err != nil {
+				log.Println(err)
+				w.Write([]byte("Error"))
+				return
+			}
+		}
+
 		hosts := ""
 		for _, host := range config.Hosts {
 			hosts += fmt.Sprintf("%s\n", host.Name)
@@ -38,7 +61,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(fmt.Sprintf(
-			"<pre>Welcome to %s (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre>",
+			"<pre>Welcome to %s (DNS %s:%d)\nPlease make sure to <a href=\"/ca.pem\">install<a/> the following CA:\n\n%s\n\nCurrently unlocking:\n%s</pre><br><form method=\"POST\" action=\"/addhost\"><input placeholder=\"domain.com\" required name=\"name\"><br><input type=\"submit\" value=\"Add domain\"></form>",
 			config.InfoHost,
 			*publicIP,
 			*dnsPort,

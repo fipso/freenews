@@ -133,7 +133,8 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
                 // Disable JS
                 if options.DisableJS == nil || *options.DisableJS {
-                  re := regexp.MustCompile(`<script.*<\/script>`)
+                  // TODO: This is not working on multi line scripts
+                  re := regexp.MustCompile(`<script(.|\n)*<\/script>`)
                   b = re.ReplaceAll(b, []byte(""))
                 }
 

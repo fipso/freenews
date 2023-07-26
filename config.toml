@@ -1,10 +1,7 @@
-# The landing/info page where u can download the MITM CA to your device
+# The landing/info page where you can download the MITM CA to your device
 info_host = "free.news"
 # Use Cloudflare DNS
 upstream_dns = "1.1.1.1:53"
-
-#Use AdGuard DNS
-#upstream_dns = "94.140.14.14:53"
 
 [[host]]
 name = "example.com"
@@ -12,6 +9,6 @@ name = "example.com"
 # social_referer = true
 # googlebot_ua = true
 # googlebot_ip = true
-# disble_cookies = true
+# disable_cookie = true
+# disable_js = true
 # inject_html = ""
-

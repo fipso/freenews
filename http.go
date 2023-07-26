@@ -131,6 +131,12 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 		b = injectHtml(b, string(menu))
 
+                // Disable JS
+                if options.DisableJS == nil || *options.DisableJS {
+                  re := regexp.MustCompile(`<script.*<\/script>`)
+                  b = re.ReplaceAll(b, []byte(""))
+                }
+
 		compress(res, b)
 		return nil
 

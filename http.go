@@ -34,24 +34,39 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/addhost" && r.Method == "POST" {
 			r.ParseForm()
 			name := r.Form.Get("name")
+
+			// Validate user input
+			re := regexp.MustCompile(
+				`^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$`,
+			)
+			if !re.MatchString(name) {
+				w.Write([]byte("Error: Invalid domain"))
+				return
+			}
+
+			// Add new domain to host config
 			config.Hosts = append(config.Hosts, HostOptions{
 				Name: name,
 			})
 
+			// Append new host to config file
 			f, err := os.OpenFile("config.toml", os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
 				log.Println(err)
 				w.Write([]byte("Error"))
 				return
 			}
+			defer f.Close()
 
-			// TODO: Allowing user input may be insecure
 			_, err = f.WriteString(fmt.Sprintf("\n[[host]]\nname = \"%s\"\n", name))
 			if err != nil {
 				log.Println(err)
 				w.Write([]byte("Error"))
 				return
 			}
+
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
 		}
 
 		hosts := ""
@@ -118,6 +133,14 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
+		// Disable JS
+		if options.DisableJS == nil || *options.DisableJS {
+			// TODO: This is not working on multi line scripts
+			re := regexp.MustCompile(`<script(.|\n)*?<\/script>`)
+			log.Println(re.FindAllString(string(b), -1))
+			b = re.ReplaceAll(b, []byte(""))
+		}
+
 		//Inject custom html
 		if options.InjectHTML != nil {
 			b = injectHtml(b, *options.InjectHTML)
@@ -130,13 +153,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		b = injectHtml(b, string(menu))
-
-                // Disable JS
-                if options.DisableJS == nil || *options.DisableJS {
-                  // TODO: This is not working on multi line scripts
-                  re := regexp.MustCompile(`<script(.|\n)*<\/script>`)
-                  b = re.ReplaceAll(b, []byte(""))
-                }
 
 		compress(res, b)
 		return nil
@@ -206,7 +222,6 @@ func listenAndServeTLS() error {
 //Stolen from: https://github.com/drk1wi/Modlishka/blob/00a2385a0952c48202ed0e314b0be016e0613ba7/core/proxy.go#L375
 
 func decompress(httpResponse *http.Response) (buffer []byte, err error) {
-
 	body := httpResponse.Body
 	compression := httpResponse.Header.Get("Content-Encoding")
 
@@ -261,7 +276,6 @@ func decompress(httpResponse *http.Response) (buffer []byte, err error) {
 
 // GZIP content
 func gzipBuffer(input []byte) []byte {
-
 	var b bytes.Buffer
 	gz := gzip.NewWriter(&b)
 	if _, err := gz.Write(input); err != nil {
@@ -278,7 +292,6 @@ func gzipBuffer(input []byte) []byte {
 
 // Deflate content
 func deflateBuffer(input []byte) []byte {
-
 	var b bytes.Buffer
 	zz, err := flate.NewWriter(&b, 0)
 
@@ -298,7 +311,6 @@ func deflateBuffer(input []byte) []byte {
 }
 
 func compress(httpResponse *http.Response, buffer []byte) {
-
 	compression := httpResponse.Header.Get("Content-Encoding")
 	switch compression {
 	case "x-gzip":

@@ -92,14 +92,16 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := url.Parse("https://" + r.Host)
-	if err != nil {
-		log.Fatalf("[ERR] %s . Terminating.", err)
-	}
-	proxy := httputil.NewSingleHostReverseProxy(url)
+	proxy := &httputil.ReverseProxy{}
 	proxy.Transport = transport
-	director := proxy.Director
 	proxy.Director = func(req *http.Request) {
+		// pull page from google cache
+		if options.FromGoogleCache == nil || *options.FromGoogleCache {
+			url, _ := url.Parse(fmt.Sprintf("https://%s", r.Host))
+			rewriteRequestURL(req, url)
+                        return
+		}
+
 		//spoof twitter referer
 		if options.SocialReferer == nil || *options.SocialReferer {
 			req.Header.Set("Referer", "https://t.co/")
@@ -117,7 +119,10 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			req.Header.Set("Cookie", "")
 			req.Header.Set("Set-Cookie", "")
 		}
-		director(req)
+
+		// TODO: error handle this
+		url, _ := url.Parse(fmt.Sprintf("https://%s", r.Host))
+		rewriteRequestURL(req, url)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
 
@@ -217,123 +222,4 @@ func listenAndServeTLS() error {
 	server := &http.Server{Handler: http.HandlerFunc(mainHandler)}
 
 	return server.Serve(tlsListener)
-}
-
-//Stolen from: https://github.com/drk1wi/Modlishka/blob/00a2385a0952c48202ed0e314b0be016e0613ba7/core/proxy.go#L375
-
-func decompress(httpResponse *http.Response) (buffer []byte, err error) {
-	body := httpResponse.Body
-	compression := httpResponse.Header.Get("Content-Encoding")
-
-	var reader io.ReadCloser
-
-	switch compression {
-	case "x-gzip":
-		fallthrough
-	case "gzip":
-		// A format using the Lempel-Ziv coding (LZ77), with a 32-bit CRC.
-
-		reader, err = gzip.NewReader(body)
-		if err != io.EOF {
-			buffer, _ = io.ReadAll(reader)
-			defer reader.Close()
-		} else {
-			// Unset error
-			err = nil
-		}
-
-	case "deflate":
-		// Using the zlib structure (defined in RFC 1950) with the deflate compression algorithm (defined in RFC 1951).
-
-		reader = flate.NewReader(body)
-		buffer, _ = io.ReadAll(reader)
-		defer reader.Close()
-
-	case "br":
-		// A format using the Brotli algorithm.
-
-		c := brotli.ReaderConfig{}
-		reader, err = brotli.NewReader(body, &c)
-		buffer, _ = io.ReadAll(reader)
-		defer reader.Close()
-
-	case "compress":
-		// Unhandled: Fallback to default
-
-		fallthrough
-
-	default:
-		reader = body
-		buffer, err = io.ReadAll(reader)
-		if err != nil {
-			return nil, err
-		}
-		defer reader.Close()
-	}
-
-	return
-}
-
-// GZIP content
-func gzipBuffer(input []byte) []byte {
-	var b bytes.Buffer
-	gz := gzip.NewWriter(&b)
-	if _, err := gz.Write(input); err != nil {
-		panic(err)
-	}
-	if err := gz.Flush(); err != nil {
-		panic(err)
-	}
-	if err := gz.Close(); err != nil {
-		panic(err)
-	}
-	return b.Bytes()
-}
-
-// Deflate content
-func deflateBuffer(input []byte) []byte {
-	var b bytes.Buffer
-	zz, err := flate.NewWriter(&b, 0)
-
-	if err != nil {
-		panic(err)
-	}
-	if _, err = zz.Write(input); err != nil {
-		panic(err)
-	}
-	if err := zz.Flush(); err != nil {
-		panic(err)
-	}
-	if err := zz.Close(); err != nil {
-		panic(err)
-	}
-	return b.Bytes()
-}
-
-func compress(httpResponse *http.Response, buffer []byte) {
-	compression := httpResponse.Header.Get("Content-Encoding")
-	switch compression {
-	case "x-gzip":
-		fallthrough
-	case "gzip":
-		buffer = gzipBuffer(buffer)
-
-	case "deflate":
-		buffer = deflateBuffer(buffer)
-
-	case "br":
-		// Brotli writer is not available just compress with something else
-		httpResponse.Header.Set("Content-Encoding", "deflate")
-		buffer = deflateBuffer(buffer)
-
-	default:
-		// Whatif?
-	}
-
-	body := io.NopCloser(bytes.NewReader(buffer))
-	httpResponse.Body = body
-	httpResponse.ContentLength = int64(len(buffer))
-	httpResponse.Header.Set("Content-Length", strconv.Itoa(len(buffer)))
-
-	httpResponse.Body.Close()
 }

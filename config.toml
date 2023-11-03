@@ -6,6 +6,8 @@ upstream_dns = "1.1.1.1:53"
 [[host]]
 name = "example.com"
 # Defaults: 
+# from_google_cache = false
+#   This option requires all other options to be false
 # social_referer = true
 # googlebot_ua = true
 # googlebot_ip = true

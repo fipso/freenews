@@ -3,14 +3,13 @@ module freenews
 go 1.18
 
 require (
+	github.com/BurntSushi/toml v1.1.0
+	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dsnet/compress v0.0.1
 	github.com/miekg/dns v1.1.48
 )
 
 require (
-	github.com/BurntSushi/toml v1.1.0 // indirect
-	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89 // indirect
-	golang.org/x/exp v0.0.0-20220428152302-39d4317da171 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20211013180041-c96bc1413d57 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect

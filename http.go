@@ -1,13 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"compress/flate"
-	"compress/gzip"
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -15,11 +11,8 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
-
-	"github.com/dsnet/compress/brotli"
 )
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,14 +85,26 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proxy := &httputil.ReverseProxy{}
+	newUrl, err := url.Parse(fmt.Sprintf("https://%s", r.Host))
+	if err != nil {
+		w.Write([]byte("Could not parse URL"))
+		return
+	}
+	proxy := httputil.NewSingleHostReverseProxy(newUrl)
+	director := proxy.Director
 	proxy.Transport = transport
 	proxy.Director = func(req *http.Request) {
+		// Use the original director to forward the request to the original host
+		director(req)
+
 		// pull page from google cache
-		if options.FromGoogleCache == nil || *options.FromGoogleCache {
-			url, _ := url.Parse(fmt.Sprintf("https://%s", r.Host))
-			rewriteRequestURL(req, url)
-                        return
+		if options.FromGoogleCache != nil && *options.FromGoogleCache {
+			log.Println("Pulling from google cache")
+			req.URL, _ = url.Parse(
+				"https://webcache.googleusercontent.com/search?q=cache:" + req.URL.String(),
+			)
+			req.Host = "webcache.googleusercontent.com"
+			return
 		}
 
 		//spoof twitter referer
@@ -119,10 +124,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			req.Header.Set("Cookie", "")
 			req.Header.Set("Set-Cookie", "")
 		}
-
-		// TODO: error handle this
-		url, _ := url.Parse(fmt.Sprintf("https://%s", r.Host))
-		rewriteRequestURL(req, url)
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
 
@@ -138,11 +139,18 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
+		// Remove Google Cache Banner & Stylesheet
+		if options.FromGoogleCache != nil && *options.FromGoogleCache {
+			// TODO: Simplify this regex
+			re := regexp.MustCompile(
+				`<!doctype html>(.|\n)*?<div id="...........__google-cache-hdr">(.|\n)*?<!doctype html>`,
+			)
+			b = re.ReplaceAll(b, []byte(""))
+		}
+
 		// Disable JS
 		if options.DisableJS == nil || *options.DisableJS {
-			// TODO: This is not working on multi line scripts
 			re := regexp.MustCompile(`<script(.|\n)*?<\/script>`)
-			log.Println(re.FindAllString(string(b), -1))
 			b = re.ReplaceAll(b, []byte(""))
 		}
 
@@ -201,19 +209,22 @@ func serveHTTP() {
 	}
 
 	go func() {
-		server := &http.Server{Addr: ":80", Handler: http.HandlerFunc(mainHandler)}
+		server := &http.Server{
+			Addr:    fmt.Sprintf(":%d", *httpPort),
+			Handler: http.HandlerFunc(mainHandler),
+		}
 		if err := server.ListenAndServe(); err != nil {
 			log.Fatalf("[ERR] %s . Terminating.", err)
 		}
 	}()
-	log.Println("[HTTP] Listening on 0.0.0.0:80/443(tls)")
+	log.Printf("[HTTP] Listening on 0.0.0.0:%d/%d(tls)", *httpPort, *httpsPort)
 	if err := listenAndServeTLS(); err != nil {
 		log.Fatalf("[ERR] %s . Terminating.", err)
 	}
 }
 
 func listenAndServeTLS() error {
-	conn, err := net.Listen("tcp", "0.0.0.0:443")
+	conn, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", *httpsPort))
 	if err != nil {
 		return err
 	}

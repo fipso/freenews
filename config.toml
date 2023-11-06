@@ -7,7 +7,7 @@ upstream_dns = "1.1.1.1:53"
 name = "example.com"
 # Defaults: 
 # from_google_cache = false
-#   This option requires all other options to be false
+#   This option will ignore all other header based options
 # social_referer = true
 # googlebot_ua = true
 # googlebot_ip = true

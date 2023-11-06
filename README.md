@@ -2,27 +2,34 @@
 
 ![build status](https://github.com/fipso/freenews/actions/workflows/go.yml/badge.svg?branch=main)
 
-A paywall bypassing reverse proxy and DNS server written in go.
+Reverse Proxy & DNS based solution to bypass paywalls written in go
 
-Status: Beta Software ~ Should work, may break
+### Features
 
-### Why ?
+- Pull from Google Cache Bypass (shoutout to 12ft.io)
+- HTTP Header based bypasses
+    - AdsBot-Google User Agent
+    - X-Forwarded-For Google Datacenter IP
+    - Twitter t.co Referer
+    - Drop Cookie & Set-Cookie
+- HTTP Body patches
+    - Disable JS. Removes <script> tags
+    - Inject custom html/js
+- DNS/Hosts based AdBlock
 
-The goal of this project is to provide an unpaywalling solution that works on platforms where modifying your browsers content is not possible. Basically this is something like [Hover](https://github.com/nathan-149/hover-paywalls-browser-extension), but as a reverse proxy (+DNS for better usability). This makes usage on mobile devices really enjoyable.
-It can be used on all devices where the user is able to change the DNS and install a self-signed CA.
+### Usage
 
-### How does it work ?
+1. Tell your devices to use your own DNS server
+2. Go to `free.news`
+3. Download and install CA file (apps not Wi-Fi)
+4. Profit
 
-![image](https://user-images.githubusercontent.com/8930842/200426509-df51e0b0-fcf1-4777-a06c-f109ee71decf.png)
-
-The approach this application follows can be split into two different parts:
-
-Reverse Proxy:
-We utilize a simple reverse proxy that listens on any domain and just forwards request to the host at which the original domain points. While doing so the proxy injects [a bunch of different bypass techniques](https://medium.datadriveninvestor.com/how-to-bypass-any-paywall-for-free-df87832cbff7) into your requests. This basically allows us to duplicate websites to a server that we own and modify them.
-
-DNS Server:
-By providing a self-hosted nameserver and a self singed CA we are able to actually "steal" the original domains (at least while you are using that DNS server).
-The nameserver just mirrors 1.1.1.1 (Cloudflare DNS server), but overrides all requests that go to a list of customizable sites to be redirected to our reverse proxy host (basically saying replaces the original website with the unpaywalled one).
+### How?
+- ./freenews spawns a DNS and a HTTP server (and TLS versions of it ofc)
+- You install a custom CA on your device
+- Your device sends DNS querys to your own DNS. If the site is on your bypass whitelist the server will respond with its own public IP, otherwise it will forward to an upstream DNS like 1.1.1.1
+- Your phone then connects to the HTTP reverse proxy mirror that you own
+- Freenews HTTP server returns the unpaywalled version
 
 ### How to install ?
 
@@ -76,12 +83,6 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-
-### Usage
-
-1. On you phone set your DNS server to your public host IP / domain
-2. Go to `free.news`
-3. Download and install ca file (apps not Wi-Fi)
 
 ### How to use DNS over TLS ?
 

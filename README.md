@@ -16,6 +16,7 @@ Reverse Proxy & DNS based solution to bypass paywalls written in go
     - Disable JS. Removes <script> tags
     - Inject custom html/js
 - DNS/Hosts based AdBlock
+- DNS server supports UDP & TLS (DoT)
 
 ### Usage
 

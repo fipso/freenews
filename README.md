@@ -123,7 +123,7 @@ We currently redirect all blocked domains to 127.0.0.1
 - [x] Add docker image & instructions
 - [x] Add DNS based AdBlock
 - [x] Add non root running instructions
-- [ ] Allow UDP connections
+- [ ] Allow TCP connections
 - [ ] Improve code quality and comments
 - [ ] Provide better usage instructions
 - [ ] More config options

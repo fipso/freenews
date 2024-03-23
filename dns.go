@@ -12,35 +12,44 @@ func answerQuery(m *dns.Msg) {
 	for _, q := range m.Question {
 		switch q.Qtype {
 		case dns.TypeA:
-			host := q.Name[:len(q.Name)-1]
+			answerQuestionType(m, q, "A", *publicIP, "127.0.0.1")
+		case dns.TypeAAAA:
+			// If this isn't set, and a query doesn't have an A type question that we answer here,
+			// the query will be forwarded upstream which might not be the result we intended.
+			if mitmAAAA != nil {
+				answerQuestionType(m, q, "AAAA", *mitmAAAA, "::1")
+			}
+		}
+	}
+}
 
-			// Check if question is for the info host or on unpaywall list
-			options := getHostOptions(host)
-			if compareBase(host, config.InfoHost) || options != nil {
-				record := fmt.Sprintf("%s A %s", q.Name, *publicIP)
-				rr, err := dns.NewRR(record)
-				if err != nil {
-					log.Println("[ERR]", err)
-					continue
-				}
-				m.Answer = append(m.Answer, rr)
+func answerQuestionType(m *dns.Msg, q dns.Question, _type, mitmHost, blockHost string) {
+	host := q.Name[:len(q.Name)-1]
+
+	// Check if question is for the info host or on unpaywall list
+	options := getHostOptions(host)
+	if compareBase(host, config.InfoHost) || options != nil {
+		record := fmt.Sprintf("%s %s %s", q.Name, _type, mitmHost)
+		rr, err := dns.NewRR(record)
+		if err != nil {
+			log.Println("[ERR]", err)
+			return
+		}
+		m.Answer = append(m.Answer, rr)
+		return
+	}
+
+	// Check if host is on blocklist
+	for _, blocked := range blockList {
+		if host == blocked {
+			record := fmt.Sprintf("%s %s %s", q.Name, _type, blockHost)
+			rr, err := dns.NewRR(record)
+			if err != nil {
+				log.Println("[ERR]", err)
 				continue
 			}
-
-			// Check if host is on blocklist
-			for _, blocked := range blockList {
-				if host == blocked {
-					record := fmt.Sprintf("%s A 127.0.0.1", q.Name)
-					rr, err := dns.NewRR(record)
-					if err != nil {
-						log.Println("[ERR]", err)
-						continue
-					}
-					m.Answer = append(m.Answer, rr)
-					break
-				}
-			}
-
+			m.Answer = append(m.Answer, rr)
+			break
 		}
 	}
 }

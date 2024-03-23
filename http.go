@@ -16,7 +16,7 @@ import (
 )
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Host == "free.news" {
+	if r.Host == config.InfoHost {
 
 		if r.URL.Path == "/ca.pem" {
 			w.Header().Set("Content-Type", "application/x-pem-file")

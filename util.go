@@ -13,7 +13,7 @@ import (
 	"github.com/dsnet/compress/brotli"
 )
 
-//https://stackoverflow.com/questions/41670155/get-public-ip-in-golang
+// https://stackoverflow.com/questions/41670155/get-public-ip-in-golang
 type IP struct {
 	Query string
 }

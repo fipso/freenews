@@ -15,8 +15,10 @@ import (
 	"time"
 )
 
+var domainRegexp = regexp.MustCompile(`^([a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.)+[a-zA-Z]{2,}$`)
+
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Host == "free.news" {
+	if r.Host == config.InfoHost {
 
 		if r.URL.Path == "/ca.pem" {
 			w.Header().Set("Content-Type", "application/x-pem-file")
@@ -29,11 +31,8 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 			name := r.Form.Get("name")
 
 			// Validate user input
-			re := regexp.MustCompile(
-				`^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$`,
-			)
-			if !re.MatchString(name) {
-				w.Write([]byte("Error: Invalid domain"))
+			if !domainRegexp.MatchString(name) {
+				http.Error(w, "Error: Invalid domain", http.StatusBadRequest)
 				return
 			}
 

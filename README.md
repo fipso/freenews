@@ -136,3 +136,6 @@ We currently redirect all blocked domains to 127.0.0.1
 
 ### Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=fipso/freenews&type=Date)](https://star-history.com/#fipso/freenews&Date)
+
+### Advertisment
+In case your are looking for a ETH Node provider where you can deploy your Containers directly onto a Node [checkout BLAZED.sh](https://blazed.sh)

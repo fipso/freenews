@@ -58,9 +58,10 @@ func TestInjectHtml(t *testing.T) {
 }
 
 func TestScriptRegexp(t *testing.T) {
-	in := "<p>a</p><SCRIPT src=x>\r\n</script ><noscript>keep</noscript><script>\nvar x\n</script>"
-	got := scriptRegexp.ReplaceAllString(in, "")
-	if got != "<p>a</p><noscript>keep</noscript>" {
+	data := `<script id="__NEXT_DATA__" type="application/json">{"a":1}</script><script type='application/ld+json'>{}</script>`
+	in := "<p>a</p><SCRIPT src=x>\r\n</script ><noscript>keep</noscript><script>\nvar x\n</script>" + data + `<script type="module">x()</script>`
+	got := string(removeScripts([]byte(in)))
+	if got != "<p>a</p><noscript>keep</noscript>"+data {
 		t.Errorf("got %q", got)
 	}
 }

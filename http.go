@@ -20,6 +20,9 @@ import (
 var (
 	domainRegexp = regexp.MustCompile(`(?i)^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$`)
 	scriptRegexp = regexp.MustCompile(`(?is)<script\b.*?</script\s*>`)
+	// Data blocks like __NEXT_DATA__ or ld+json never execute, and often hold
+	// the full article text, so disable_js keeps them for inject_html to use
+	jsonScriptRegexp = regexp.MustCompile(`(?i)^<script\b[^>]*\btype\s*=\s*["']?application/(ld\+)?json`)
 	bodyRegexp   = regexp.MustCompile(`(?i)<body\b[^>]*>`)
 )
 
@@ -110,7 +113,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Disable JS
 		if enabled(options.DisableJS, true) {
-			b = scriptRegexp.ReplaceAll(b, nil)
+			b = removeScripts(b)
 		}
 
 		//Inject custom html
@@ -219,6 +222,15 @@ func (t archiveTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.URL = loc
 		req.Host = loc.Host
 	}
+}
+
+func removeScripts(b []byte) []byte {
+	return scriptRegexp.ReplaceAllFunc(b, func(script []byte) []byte {
+		if jsonScriptRegexp.Match(script) {
+			return script
+		}
+		return nil
+	})
 }
 
 // injectHtml inserts inject right after the opening <body> tag

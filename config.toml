@@ -11,6 +11,6 @@ name = "example.com"
 # social_referer = true
 # googlebot_ua = true
 # googlebot_ip = true
-# disable_cookie = true
+# disable_cookies = true
 # disable_js = true
 # inject_html = ""

@@ -23,6 +23,7 @@ var (
 	httpsPort           *int
 	dotDomain           *string
 	blockListPath       *string
+	readerPort          *int
 	config              Config
 )
 
@@ -35,6 +36,7 @@ func main() {
 	httpsPort = flag.Int("httpsPort", 443, "Port for HTTPS Reverse Proxy")
 	dotDomain = flag.String("dotDomain", "", "Domain for DNS over TLS")
 	blockListPath = flag.String("blockList", "", "Path to a DNS block list file")
+	readerPort = flag.Int("readerPort", 0, "Port for the paste-a-link reader web app (0 = off)")
 	flag.Parse()
 
 	//Parse config file
@@ -75,6 +77,10 @@ func main() {
 				log.Fatalf("[ERR] Failed to start DNS over TLS server: %s", err)
 			}
 		}()
+	}
+
+	if *readerPort != 0 {
+		go serveReader(*readerPort)
 	}
 
 	serveHTTP()

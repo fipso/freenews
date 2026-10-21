@@ -149,7 +149,11 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	a, err := fetchArticle(r.Context(), u)
 	if err != nil {
 		log.Println("[READER]", u, err)
-		page.Error = "Couldn't load the article: " + err.Error()
+		page.Error = "Couldn't load the article: " + err.Error() + "."
+		var wall *botWallError
+		if errors.As(err, &wall) {
+			page.Error = "This site blocks automated readers: " + err.Error() + "."
+		}
 		renderReader(w, http.StatusBadGateway, page)
 		return
 	}
@@ -182,6 +186,8 @@ func fetchArticle(ctx context.Context, u *url.URL) (*article, error) {
 
 	var best *article
 	var firstErr error
+	var wall *botWallError
+	archiveFailed := false
 	for _, mode := range modes {
 		a, err := fetchAndExtract(ctx, u, options, mode)
 		if errors.Is(err, errPrivateAddress) {
@@ -191,6 +197,11 @@ func fetchArticle(ctx context.Context, u *url.URL) (*article, error) {
 			log.Printf("[READER] %s (%s): %s", u, mode, err)
 			if firstErr == nil {
 				firstErr = err
+			}
+			if mode == modeArchive {
+				archiveFailed = true
+			} else if wall == nil {
+				errors.As(err, &wall)
 			}
 			continue
 		}
@@ -202,9 +213,55 @@ func fetchArticle(ctx context.Context, u *url.URL) (*article, error) {
 		}
 	}
 	if best == nil {
+		// The bot wall is the real reason, not e.g. a missing archive copy
+		if wall != nil {
+			wall.NoArchive = archiveFailed
+			return nil, wall
+		}
 		return nil, firstErr
 	}
 	return best, nil
+}
+
+// Bot protection services answer with a challenge page instead of the
+// article. We don't try to get past them, only explain what happened
+var botWalls = []struct{ vendor, marker string }{
+	{"DataDome", "captcha-delivery.com"},
+	{"DataDome", "datadome"},
+	{"Cloudflare", "challenges.cloudflare.com"},
+	{"Cloudflare", "cf_chl_opt"},
+	{"Cloudflare", "cf-chl-"},
+	{"Imperva", "_incapsula_resource"},
+	{"HUMAN (PerimeterX)", "px-captcha"},
+	{"HUMAN (PerimeterX)", "perimeterx"},
+}
+
+// detectBotWall returns the bot protection vendor if page is a challenge
+// page. Only short pages count: a real article may mention these names
+func detectBotWall(page []byte) string {
+	if len(page) > 64<<10 {
+		return ""
+	}
+	low := bytes.ToLower(page)
+	for _, w := range botWalls {
+		if bytes.Contains(low, []byte(w.marker)) {
+			return w.vendor
+		}
+	}
+	return ""
+}
+
+type botWallError struct {
+	Site, Vendor string
+	NoArchive    bool
+}
+
+func (e *botWallError) Error() string {
+	msg := fmt.Sprintf("%s is protected by %s, a bot blocker that only lets real browsers through (it answers automated readers like this one with a CAPTCHA)", e.Site, e.Vendor)
+	if e.NoArchive {
+		msg += ". The Wayback Machine has no copy either, so this article can only be opened in a normal browser"
+	}
+	return msg
 }
 
 type fetchMode string
@@ -250,6 +307,13 @@ func fetchAndExtract(ctx context.Context, u *url.URL, options *HostOptions, mode
 		return nil, errors.New("the site didn't respond or refused the connection")
 	}
 	defer res.Body.Close()
+	b, err := io.ReadAll(io.LimitReader(res.Body, maxPageBytes))
+	if err != nil {
+		return nil, err
+	}
+	if vendor := detectBotWall(b); vendor != "" {
+		return nil, &botWallError{Site: strings.TrimPrefix(res.Request.URL.Hostname(), "www."), Vendor: vendor}
+	}
 	if res.StatusCode != http.StatusOK {
 		if mode == modeArchive && res.StatusCode == http.StatusNotFound {
 			return nil, errors.New("the Wayback Machine has no copy")
@@ -258,10 +322,6 @@ func fetchAndExtract(ctx context.Context, u *url.URL, options *HostOptions, mode
 	}
 	if ct := res.Header.Get("Content-Type"); ct != "" && !strings.Contains(ct, "html") {
 		return nil, fmt.Errorf("not a web page (%s)", ct)
-	}
-	b, err := io.ReadAll(io.LimitReader(res.Body, maxPageBytes))
-	if err != nil {
-		return nil, err
 	}
 
 	a := extractArticle(b, u)

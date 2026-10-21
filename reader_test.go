@@ -80,3 +80,26 @@ func TestIsPublicIP(t *testing.T) {
 		}
 	}
 }
+
+func TestDetectBotWall(t *testing.T) {
+	cases := map[string]string{
+		`<html><body><p id="cmsg">Please enable JS and disable any ad blocker</p><script data-cfasync="false">var dd={'host':'geo.captcha-delivery.com'}</script><script src="https://ct.captcha-delivery.com/c.js"></script></body></html>`: "DataDome",
+		`<!DOCTYPE html><title>Just a moment...</title><script>window._cf_chl_opt={cvId:'3'}</script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>`: "Cloudflare",
+		`<html><head><META NAME="robots" CONTENT="noindex,nofollow"><script src="/_Incapsula_Resource?SWJIYLWA=5074a7"></script></head></html>`: "Imperva",
+		`<div id="px-captcha"></div>`: "HUMAN (PerimeterX)",
+		`<html><body><article><p>An ordinary article about Cloudflare and DataDome.</p></article></body></html>` + strings.Repeat(" ", 70<<10): "",
+		`<html><body><p>Just a normal short page</p></body></html>`: "",
+	}
+	for page, want := range cases {
+		if got := detectBotWall([]byte(page)); got != want {
+			t.Errorf("detectBotWall(%.60q) = %q, want %q", page, got, want)
+		}
+	}
+
+	msg := (&botWallError{Site: "kn-online.de", Vendor: "DataDome", NoArchive: true}).Error()
+	for _, want := range []string{"kn-online.de", "DataDome", "CAPTCHA", "Wayback Machine has no copy"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("message %q missing %q", msg, want)
+		}
+	}
+}

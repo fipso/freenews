@@ -23,29 +23,37 @@ var (
 	httpsPort           *int
 	dotDomain           *string
 	blockListPath       *string
+	readerPort          *int
 	config              Config
 )
 
 func main() {
 	//Parse flags
-	publicIP = flag.String("publicIP", getPublicIP(), "Public interface ip address")
+	publicIP = flag.String("publicIP", "", "Public interface ip address (auto-detected if empty)")
 	dnsPort = flag.Int("dnsPort", 53, "Port for normal UDP DNS")
 	dnsTlsPort = flag.Int("dnsTlsPort", 853, "Port for DNS over TLS aka. DoT")
 	httpPort = flag.Int("httpPort", 80, "Port for HTTP Reverse Proxy")
 	httpsPort = flag.Int("httpsPort", 443, "Port for HTTPS Reverse Proxy")
 	dotDomain = flag.String("dotDomain", "", "Domain for DNS over TLS")
 	blockListPath = flag.String("blockList", "", "Path to a DNS block list file")
+	readerPort = flag.Int("readerPort", 0, "Port for the paste-a-link reader web app (0 = off)")
 	flag.Parse()
 
 	//Parse config file
 	//TODO make flags overridable
 	parseConfigFile()
 
-	serverIps := make([]string, 0, 2)
-	if publicIP != nil {
-		serverIps = append(serverIps, *publicIP)
+	if *publicIP == "" {
+		ip, err := getPublicIP()
+		if err != nil {
+			log.Fatalf("[ERR] Could not detect public IP (%s). Set it with -publicIP", err)
+		}
+		*publicIP = ip
 	}
-	if mitmAAAA != nil {
+
+	serverIps := make([]string, 0, 2)
+	serverIps = append(serverIps, *publicIP)
+	if *mitmAAAA != "" {
 		serverIps = append(serverIps, *mitmAAAA)
 	}
 	log.Printf("[*] Welcome. Public DNS Server IPs: %v", strings.Join(serverIps, ", "))
@@ -64,7 +72,15 @@ func main() {
 	go serveDNS()
 	if *dotDomain != "" {
 		setupDoTCerts()
-		go serveDNSoverTLS()
+		go func() {
+			if err := serveDNSoverTLS(); err != nil {
+				log.Fatalf("[ERR] Failed to start DNS over TLS server: %s", err)
+			}
+		}()
+	}
+
+	if *readerPort != 0 {
+		go serveReader(*readerPort)
 	}
 
 	serveHTTP()
